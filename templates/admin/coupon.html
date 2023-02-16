@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coupon Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.1.0/mdb.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    
+    
+    <link rel="stylesheet" href="/static/adminstyle.css">
+</head>
+<body>
+
+    <section id="menu">
+        <div class="logo">
+            <!-- <img src="/image/signup1.jpg" alt=""> -->
+            <h2 style="color: black;">Bookies.Com</h2>
+        </div>
+
+        <div class="items">
+            <li><i class="fa-solid fa-chart-line"></i></i><a href="#">Dashboard</a></li>
+            <li><i class="fa-regular fa-address-card"></i><a href="#">Profile</a></li>
+            <li><i class="fa-solid fa-users"></i><a href="{% url 'user_management' %}">Users</a></li>
+            <li><i class="fa-brands fa-product-hunt"></i><a href="{% url 'product_management' %}">Products</a></li>
+            <li><i class="fa-solid fa-boxes-stacked"></i><a href="{% url 'category_management' %}">Category</a></li>
+            <li><i class="fa-solid fa-cart-shopping"></i><a href="{% url 'order_management' %}">Orders</a></li>
+            <li><i class="fa-solid fa-image"></i><a href="{% url 'banner_management' %}">Banner Management</a></li>
+            <li><i class="fa-solid fa-gifts"></i><a href="{% url 'coupon_management' %}">Coupons</a></li>
+        </div>
+    </section>
+    
+    <section id="interface">
+        <div class="navigation">
+            <div class="n1">
+                <div class="search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <img src="" alt="">
+                    <form action="category_management">
+                        <input name="search" type="text" placeholder="Search">
+                    </form>
+                </div>   
+            </div>
+            
+            <div class="profile">
+                <a href="{% url 'admin_logout' %}">Log out</a><i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </div>
+        </div>
+
+        <!-- {% for x in messages %}
+          <p class="text-success" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{x}}</p>
+        {% endfor %} -->
+        {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+            <li style="list-style-type: none;" {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+          {% endfor %}
+        </ul>
+        <script>
+          setTimeout(function() {
+            var messages = document.querySelector(".messages");
+            messages.style.display = "none";}, 5000);
+        </script>
+      {% endif %}
+
+ <!-- Category Details Starts -->
+        <div class="col-md-6 offset-md-3 my-3">
+            <div class="card">
+              <div class="card-body">
+                
+                <table class="table table-striped">
+                  <h3 class="text-center">Coupon Management</h3>
+                  <thead>
+                    <tr>
+                      <th>Sl.No.</th>
+                      <th>Coupon Code </th>
+                      <th>Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for i in coup %}
+                    <tr>
+                      <td>{{forloop.counter}}</td>
+                      <td>{{i.coupname}}</td>
+                      <td>{{i.price}}</td>
+                      <td>
+                        <a href="{% url 'delete_coupon' %}?coupid={{i.couponid}}" class="btn btn-danger md-sm">Delete</a>
+                      </td>   
+                    </tr> 
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>   
+<!--Category Details Ends  -->
+<!-- Button trigger modal -->
+    <button type="button" class="btn btn-success md-sm" data-bs-toggle="modal" data-bs-target="#exampleModal">Add Coupon</button>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Add Coupon</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form action="/addcoupon" method="POST">
+                {% csrf_token %}
+                <div class="md-3">
+                    <label for="coupname">Coupon Code</label>
+                    <input name="add_coupname" type="text" class="form-control" required>
+                </div>
+                <div class="md-3">
+                    <label for="cname">Discount Price</label>
+                    <input name="add_price" type="text" class="form-control" required>
+                </div>
+                <div class="container text-center my-3">
+                    <button class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+    <script>const myModal = document.getElementById('myModal')
+        const myInput = document.getElementById('myInput')
+        
+        myModal.addEventListener('shown.bs.modal', () => {
+          myInput.focus()
+        })</script>
+
+    <script
+  type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.1.0/mdb.min.js"
+></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" integrity="sha384-mQ93GR66B00ZXjt0YO5KlohRA5SY2XofN4zfuZxLkoj1gXtW8ANNCe9d5Y3eG5eD" crossorigin="anonymous"></script> -->
+</body>
+</html>

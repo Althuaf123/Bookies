@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Account Settings UI Design</title>
+	<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+	<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" type="text/css" href="/static/profile.css">
+</head>
+<body>
+	<!-- Navbar Starts -->
+	<nav class="navbar navbar-expand-lg navbar-light bg-secondary fixed-top">
+		<div class="container px-4 px-lg-5">
+			<a class="navbar-brand" href="{% url 'homepage' %}">Bookies.com</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+					<li class="nav-item"><a class="nav-link active" aria-current="page" href="{% url 'landingpage' %}">Home</a></li>
+					<li class="nav-item"><a class="nav-link active" href="{% url 'productpage' %}">Shop</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+	<!-- Navbar Ends -->
+	
+	<section class="vh-100 py-5 my-5" style="background-color: darkgray; height: 100%;">
+		<div class="container">
+			<input type="hidden" value="{{data.userid}}" name="id" id="">
+			<h1 class="mb-5">Account Settings</h1>
+			<div class="bg-white shadow rounded-lg d-block d-sm-flex">
+				<div class="profile-tab-nav border-right">
+					<div class="p-4">
+						<div class="img-circle text-center mb-3">
+							<!-- <img src="img/user2.jpg" alt="Image" class="shadow"> -->
+							<lottie-player src="https://assets6.lottiefiles.com/packages/lf20_mr1kkmr2.json"  background="transparent"  speed="1"  style="width:200px; height: 100px;" hover  autoplay></lottie-player>
+						</div>
+						<h4 class="text-center">{{data.name}}</h4>
+					</div>
+					
+					<div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+						<a class="nav-link active" id="account-tab" data-toggle="pill" href="#account" role="tab" aria-controls="account" aria-selected="true">
+							<i class="fa fa-home text-center mr-1"></i> 
+							Account
+						</a>
+						<a class="nav-link" id="password-tab" data-toggle="pill" href="#password" role="tab" aria-controls="password" aria-selected="false">
+							<i class="fa fa-key text-center mr-1"></i> 
+							Password
+						</a>
+						<a class="nav-link" id="security-tab" data-toggle="pill" href="#security" role="tab" aria-controls="security" aria-selected="false">
+							<i class="fa fa-user text-center mr-1"></i> 
+							Security
+						</a>
+						<a class="nav-link" id="application-tab" data-toggle="pill" href="#address" role="tab" aria-controls="application" aria-selected="false">
+							<i class="fa fa-tv text-center mr-1"></i> 
+							Address
+						</a>
+						<a class="nav-link" id="notification-tab" data-toggle="pill" href="#notification" role="tab" aria-controls="notification" aria-selected="false">
+							<i class="fa fa-bell text-center mr-1"></i> 
+							Notification
+						</a>
+					</div>
+				</div>
+				
+				<div class="tab-content p-4 p-md-5" id="v-pills-tabContent">
+					{% if messages %}
+                		<ul class="messages">
+                			{% for message in messages %}
+                				<li style="list-style-type: none;" {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                			{% endfor %}
+                		</ul>
+                		<script>
+                    		setTimeout(function() {
+                      		var messages = document.querySelector(".messages");
+                      		messages.style.display = "none";}, 5000);
+                		</script>
+            		{% endif %}
+					<div class="tab-pane fade show active" id="account" role="tabpanel" aria-labelledby="account-tab">
+						<h3 class="mb-4">Account Details</h3>
+						<div class="row">
+							<div class="col-md-6">
+								<div class="form-group">
+								  	<label>Name: </label> {{data.name}}
+									
+								  	<!-- <input type="text" class="form-control" value="{{data.name}}"> -->
+								</div>
+								<div class="form-group">
+									<label>Email:</label> {{data.email}}
+									<!-- <input type="text" class="form-control" value="{{data.email}}"> -->
+							  </div>
+							</div>
+							<!-- <div class="col-md-6">
+								<div class="form-group">
+								  	<label>Last Name</label>
+								  	<input type="text" class="form-control" value="Acharya">
+								</div>
+							</div> -->
+							<!-- <div class="col-md-6">
+								<div class="form-group">
+								  	<label>Email:</label> {{data.email}}
+								  	<input type="text" class="form-control" value="{{data.email}}">
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="form-group">
+								  	<label>Phone number</label>
+								  	<input type="text" class="form-control" value="{{data.phone}}">
+								</div>
+							</div> -->
+						</div>
+						<!-- <div>
+							<button class="btn btn-primary">Update</button>
+							<button class="btn btn-light">Cancel</button>
+						</div> -->
+					</div>
+					
+					<div class="tab-pane fade" id="password" role="tabpanel" aria-labelledby="password-tab">
+						<form action="/update_password" method="POST">
+							{% csrf_token %}
+						<h3 class="mb-4">Password Settings</h3>
+						<div class="row">
+							<div class="col-md-6">
+								<div class="form-group">
+								  	<label>Old password</label>
+								  	<input name="old_password" type="password" class="form-control">
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-6">
+								<div class="form-group">
+								  	<label>New password</label>
+								  	<input name="new_password" type="password" class="form-control">
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="form-group">
+								  	<label>Confirm new password</label>
+								  	<input name="confirm_password" type="password" class="form-control">
+								</div>
+							</div>
+						</div>
+						<!-- <div>
+							<a href="{% url 'update_password' %}" class="btn btn-primary md-sm">Update</a>
+							<a href="" class="btn btn-light md-sm">Cancel</a>
+						</div> -->
+						<button class="btn btn-primary">Update</button>
+						</form>
+					</div>
+					
+					<div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
+						<form action="/update_email" method="POST">
+							{% csrf_token %}
+						<h3 class="mb-4">Update Email</h3>
+						<div class="row">
+							<div class="col-md-6">
+								<div class="form-group">
+								  	<label>Email</label>
+								  	<input name="new_email" type="email" class="form-control">
+								</div>
+							</div>
+							<!-- <div class="col-md-6">
+								<div class="form-group">
+									<div class="form-check">
+										<input class="form-check-input" type="checkbox" value="" id="recovery">
+										<label class="form-check-label" for="recovery">
+										Recovery
+										</label>
+									</div>
+								</div>
+							</div> -->
+						</div>
+						<!-- <div>
+							<a href="" class="btn btn-primary md-sm">Update</a>
+							<a href="" class="btn btn-light md-sm">Cancel</a>
+						</div> -->
+						<button class="btn btn-primary">Update</button>
+						</form><br>
+						<form action="/mobile_otp" method="POST">
+							{% csrf_token %}
+						<h3 class="mb-4">Update Phone</h3>
+						<div class="row">
+							<div class="col-md-6">
+								<div class="form-group">
+								  	<label>Phone number</label>
+								  	<input name="new_phone" type="text" class="form-control">
+								</div>
+							</div>
+						</div>
+						<button class="btn btn-primary">Update</button>
+						</form>
+					</div>
+					<div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="application-tab">
+					
+						<div class="col-md-12 offset-md-0 my-0">
+							<div class="card">
+							  <div class="card-body">
+								
+								<table class="table table-striped">
+								  <h3 class="text-center">Saved Addresses</h3>
+								  <thead>
+									<tr>
+									  <th>Sl.No.</th>
+									  <th>Address</th>
+									</tr>
+								  </thead>
+								  <tbody>
+									{% for i in adds %}
+									<tr>
+									  <td>{{forloop.counter}}</td>
+									  <td>{{i.hname}}, {{i.hno}},
+										{{i.street}}, {{i.district}},
+										{{i.state}}, 
+										{{i.pincode}}
+									  </td>
+									  <td>
+										<!-- <a href="{% url 'delete_category' %}?cid={{i.categoryid}}" class="btn btn-danger md-sm">Delete</a> -->
+									  </td>   
+									</tr> 
+									{% endfor %}
+								  </tbody>
+								</table>
+							  </div>
+							</div>
+						  </div>   
+						<!-- <div>
+							<a href="" class="btn btn-primary md-sm">Update</a>
+							<a href="" class="btn btn-light md-sm">Cancel</a>
+						</div> -->
+					</div>
+					<!-- <div class="tab-pane fade" id="notification" role="tabpanel" aria-labelledby="notification-tab">
+						<h3 class="mb-4">Notification Settings</h3>
+						<div class="form-group">
+							<div class="form-check">
+								<input class="form-check-input" type="checkbox" value="" id="notification1">
+								<label class="form-check-label" for="notification1">
+									Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum accusantium accusamus, neque cupiditate quis
+								</label>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="form-check">
+								<input class="form-check-input" type="checkbox" value="" id="notification2" >
+								<label class="form-check-label" for="notification2">
+									hic nesciunt repellat perferendis voluptatum totam porro eligendi.
+								</label>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="form-check">
+								<input class="form-check-input" type="checkbox" value="" id="notification3" >
+								<label class="form-check-label" for="notification3">
+									commodi fugiat molestiae tempora corporis. Sed dignissimos suscipit
+								</label>
+							</div>
+						</div>
+						<div>
+							<button class="btn btn-primary">Update</button>
+							<button class="btn btn-light">Cancel</button>
+						</div>
+					</div> -->
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<footer class="py-2 bg-dark fixed-bottom">
+		<div class="container" style="display: flex; justify-content: center;">
+			<p class="m-0 text-center text-white">Copyright &copy;2023</p>
+		</div>
+		
+	</footer>
+
+	<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</body>
+</html>

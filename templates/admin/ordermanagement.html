@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.1.0/mdb.min.css" rel="stylesheet"/>
+
+    
+    <link rel="stylesheet" href="/static/adminstyle.css">
+</head>
+<body>
+
+    <section id="menu">
+
+        <div class="logo">
+            <!-- <img src="/image/signup1.jpg" alt=""> -->
+            <h2 style="color: black;">Bookies.Com</h2>
+        </div>
+
+        <div class="items">
+            <li><i class="fa-solid fa-chart-line"></i></i><a href="#">Dashboard</a></li>
+            <li><i class="fa-regular fa-address-card"></i><a href="#">Profile</a></li>
+            <li><i class="fa-solid fa-users"></i><a href="{% url 'user_management' %}">Users</a></li>
+            <li><i class="fa-brands fa-product-hunt"></i><a href="{% url 'product_management' %}">Products</a></li>
+            <li><i class="fa-solid fa-boxes-stacked"></i><a href="{% url 'category_management' %}">Category</a></li>
+            <li><i class="fa-solid fa-cart-shopping"></i><a href="{% url 'order_management' %}">Orders</a></li>
+            <li><i class="fa-solid fa-image"></i><a href="{% url 'banner_management' %}">Banner Management</a></li>
+            <li><i class="fa-solid fa-gifts"></i><a href="{% url 'coupon_management' %}">Coupons</a></li>
+        </div>
+    </section>
+    <section id="interface">
+        <div class="navigation">
+            <div class="n1">
+                <div class="search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <img src="" alt="">
+                    <form action="order_management">
+                    <input type="text" name="search" placeholder="Search">
+                    </form>
+                </div>   
+            </div>
+            
+            <div class="profile">
+                <a href="{% url 'admin_logout' %}">Log out</a><i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </div>
+        </div>
+      
+    
+        
+ <!--Order Details Starts -->
+        <div class="col-md-10 offset-md-1 my-2">
+            <div class="card">
+              <div class="card-body">
+                
+                <table class="table table-striped">
+                  <h3 class="text-center">Order Details</h3>
+                  <thead>
+                    <tr>
+                      <th>Order Id</th>
+                      <th>E-mail</th>
+                      <th>Amount</th>
+                      <th>Order Status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for i in orders %}
+                    <tr>
+                      <td><a href="{% url 'order_details' %}?orid={{i.oid.orderid}}" class="btn btn-secondary md-sm">{{i.order_lid}}</a></td>
+                      <td>{{i.uid.email}}</td>
+                      <td>{{i.total_price}}</td>
+                      <td>
+                        {% if i.status == 'Cancelled' %}
+                        <p style="color: crimson;">{{i.status}}</p>
+                        {% elif i.status == 'Delivered' %}
+                        <p style="color: rgb(11, 121, 9);">{{i.status}}</p>
+                        {% elif i.status == 'Returned' %}
+                        <p style="color: crimson;">{{i.status}}</p>
+                        {% elif i.status == 'Pending' or i.status == 'Shipping' %}
+                        <select name="orderStatus" class="form-select" id="status{{forloop.counter}}" onchange="oM(this.id, '{{i.orderlistid}}')">
+                          <option value="selected">{{i.status}}</option>
+                          <option value="Shipping">Shipping</option>
+                          <option value="Delivered">Delivered</option>
+                        </select>
+                        {% else %}
+                        <select name="orderStatus" class="form-select" id="status{{forloop.counter}}" onchange="oM(this.id, '{{i.orderlistid}}')">
+                          
+                          <option value="selected">Return Request</option>
+                          <option value="Returned">Approve</option>
+                          <option value="Request Declined">Decline</option>
+                        </select>
+                        {% csrf_token %}
+                        {% endif %}
+                      </td> 
+                      
+                      <td>
+                        {% if i.status == 'Cancelled' or i.status == 'Returned' or i.status == 'Request Declined' %}
+                        <p style="color: crimson;">--</p>
+                        {% elif i.status == 'Delivered' %}
+                        <p style="color: rgb(11, 121, 9);">--</p>
+                        {% else %}
+                        <a href="{% url 'cancel_order' %}?olid={{i.orderlistid}}" class="btn btn-danger md-sm">Cancel</a>
+                        
+                        {% endif %}
+                      </td>
+                    </tr> 
+                    {% endfor %}
+                    
+                  </tbody>
+                </table>
+                
+              </div>
+              
+            </div>
+            <br></br/>
+                <!-- Pagination -->
+                {% if orders.has_previous %}
+                  <a href="?page=1">&laquo; First</a>
+                  <a href="?page={{ orders.previous_page_number }}">Previous</a>
+                {% endif %}
+
+                Page {{ orders.number }} of {{ orders.paginator.num_pages }}
+
+                {% if orders.has_next %}
+                  <a href="?page={{ orders.next_page_number }}">Next</a>
+                  <a href="?page={{ orders.paginator.num_pages }}">Last &raquo;</a>
+                {% endif %}
+          </div>   
+<!--Order Details Ends  -->
+</section>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+    <script
+  type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.1.0/mdb.min.js"
+></script>
+    <script src="/static/js/statusip.js"></script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.1.0/mdb.min.css" rel="stylesheet"/>
+
+    
+    <link rel="stylesheet" href="/static/adminstyle.css">
+</head>
+<body>
+
+    <section id="menu">
+
+        <div class="logo">
+            <!-- <img src="/image/signup1.jpg" alt=""> -->
+            <h2 style="color: black;">Bookies.Com</h2>
+        </div>
+
+        <div class="items">
+            <li><i class="fa-solid fa-chart-line"></i></i><a href="#">Dashboard</a></li>
+            <li><i class="fa-regular fa-address-card"></i><a href="#">Profile</a></li>
+            <li><i class="fa-solid fa-users"></i><a href="{% url 'user_management' %}">Users</a></li>
+            <li><i class="fa-brands fa-product-hunt"></i><a href="{% url 'product_management' %}">Products</a></li>
+            <li><i class="fa-solid fa-boxes-stacked"></i><a href="{% url 'category_management' %}">Category</a></li>
+            <li><i class="fa-solid fa-cart-shopping"></i><a href="{% url 'order_management' %}">Orders</a></li>
+            <li><i class="fa-solid fa-image"></i><a href="{% url 'banner_management' %}">Banner Management</a></li>
+            <li><i class="fa-solid fa-gifts"></i><a href="{% url 'coupon_management' %}">Coupons</a></li>
+        </div>
+    </section>
+    <section id="interface">
+        <div class="navigation">
+            <div class="n1">
+                <div class="search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <img src="" alt="">
+                    <input type="text" placeholder="Search">
+                </div>   
+            </div>
+            
+            <div class="profile">
+                <a href="{% url 'admin_logout' %}">Log out</a><i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </div>
+        </div>
+      
+    
+        
+ <!--Order Details Starts -->
+        <div class="col-md-10 offset-md-1 my-2">
+            <div class="card">
+              <div class="card-body">
+                
+                <table class="table table-striped">
+                  <h3 class="text-center">Order Details</h3>
+                  <thead>
+                    <tr>
+                      <th>Sl. No.</th>
+                      <th>Product </th>
+                      <th>Image</th>
+                      <th>Quantity</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for i in o_li %}
+                    <tr>
+                      <td>{{forloop.counter}}</td>
+                      <td>{{i.pid.pname}}</td>
+                      <td><img width="90px" height="90px"   src="{{i.pid.image.url}}" alt=""></td>
+                      <td>{{i.quantity}}</td>
+                      <td>{{i.oid.aid.hname}}</td>
+                    </tr> 
+                    {% endfor %}  
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>   
+<!--Order Details Ends  -->
+</section>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+    <script
+  type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.1.0/mdb.min.js"
+></script>
+    <script src="/static/js/statusip.js"></script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-secondary fixed-top">
+    <div class="container px-4 px-lg-5">
+        <a class="navbar-brand" href="{% url 'homepage' %}">Bookies.com</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                <li class="nav-item"><a class="nav-link active" aria-current="page" href="{% url 'homepage' %}">Home</a></li>
+                <li class="nav-item"><a class="nav-link active" href="{% url 'productpage' %}">Shop</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Category</a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="#!">All Products</a></li>
+                        <li><hr class="dropdown-divider" /></li>
+                        {% for i in cat%}
+                        <li><a class="dropdown-item" href="#!">{{i.cname}}</a></li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                <!-- Search bar -->
+                <div class="input-group">
+                    <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
+                    <button type="button" class="btn btn-outline-primary">search</button>
+                  </div>
+                <!-- Search bar ends -->
+            </ul>
+            <form class="d-flex">
+
+                <button class="btn btn-outline-dark" type="submit">
+                    <i class="fa-solid fa-user"></i>
+                    <!-- <span class="material-symbols-outlined">account_circle</span> -->
+                </button>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"></a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a href="{% url 'userprofile' %}" class="dropdown-item">My Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'cart' %}">Cart</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#!">Wishlist</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'order_history' %}">Orders</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'user_logout' %}">Log Out</a></li>
+                    </ul>
+                </li>
+            </form>
+        </div>
+    </div>
+</nav>
+<div class="container">
+{% for i in orders %}
+<section class="mt-2 ms-lg-4">
+  <div class="card mb-2" style="max-width: 740px;">
+    <div class="row g-0">
+      <div class="col-md-4">
+        <img src="{{i.pid.image.url}}" class="img-fluid rounded-start" alt="...">
+      </div>
+      <div class="col-md-8">
+        <div class="card-body">
+          <h5 class="card-title">{{i.pid.pname}}</h5>
+          <p class="card-text">Quantity: {{i.quantity}}</p><br>
+          <p class="card-text">Price: {{i.total_price}}</p><br>
+          <p class="card-text">Address: {{i.oid.aid.hname}},{{i.oid.aid.hno}},{{i.oid.aid.street}},{{i.oid.aid.street}},{{i.oid.aid.state}}, {{i.oid.aid.pincode}}</p><br>
+          <p class="card-text"></p><br>
+          <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+        </div>
+      </div>
+      {% if i.oid.status == 'Cancelled' %}
+      <h5 style="color: crimson ;" class="card-title">Order Cancelled </h5>
+      {% elif i.oid.status == 'Delivered' %}
+      <h6 style="color: green;" class="card-title">Order Delivered </h6>
+      <a href="{% url 'return_order' %}?olid={{i.orderlistid}}" class="btn btn-outline-dark">Return</a>
+      {% else %}
+      <h6 style="color: rgb(12, 81, 98);" class="card-title">Order Status: {{i.oid.status}}</h6>
+      <a href="{% url 'user_order_cancel' %}?oid={{i.orderid}}" class="btn btn-danger">Cancel Order</a>
+      {% endif %}
+    </div>
+  </div> 
+</section>
+{%  endfor %}
+</div> 
+
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script> 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
+
+
+

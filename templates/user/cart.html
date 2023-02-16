@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Cart</title>
+<!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
+<!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"rel="stylesheet"/>
+<!-- MDB -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.1.0/mdb.min.css"rel="stylesheet"/>
+</head>
+<body>
+
+<!-- Nav Bar Starts -->
+
+<nav class="navbar navbar-expand-lg navbar-light bg-secondary fixed-top">
+    <!-- Container wrapper -->
+    <div class="container-fluid">
+      <!-- Toggle button -->
+      <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars"></i>
+      </button>
+  
+      <!-- Collapsible wrapper -->
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <!-- Navbar brand -->
+        <a class="navbar-brand mt-2 px-4 mt-lg-0" href="{% url 'homepage' %}">Bookies.Com</a>
+        <!-- Left links -->
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'homepage' %}">Home</a>
+          </li>
+          <!-- <li class="nav-item">
+            <a class="nav-link" href="#">Team</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Projects</a>
+          </li> -->
+        </ul>
+        <!-- Left links -->
+      </div>
+      <!-- Collapsible wrapper -->
+  
+      <!-- Right elements -->
+      <div class="d-flex align-items-center">
+        <!-- Icon -->
+        <!-- <a class="text-reset me-3" href="#"><i class="fas fa-shopping-cart"></i></a> -->
+  
+        <!-- Notifications -->
+        <!-- <div class="dropdown">
+          <a class="text-reset me-3 dropdown-toggle hidden-arrow" href="#" id="navbarDropdownMenuLink" role="button" data-mdb-toggle="dropdown" aria-expanded="false"><i class="fas fa-bell"></i><span class="badge rounded-pill badge-notification  bg-danger">1</span></a>
+          <ul
+            class="dropdown-menu dropdown-menu-end"
+            aria-labelledby="navbarDropdownMenuLink">
+            <li>
+              <a class="dropdown-item" href="#">Some news</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="#">Another news</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="#">Something else here</a>
+            </li>
+          </ul>
+        </div> -->
+        <!-- Avatar -->
+        <div class="dropdown">
+          <a class="dropdown-toggle d-flex align-items-center hidden-arrow" href="#" id="navbarDropdownMenuAvatar" role="button" data-mdb-toggle="dropdown" aria-expanded="false">
+            <!-- <img src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp" class="rounded-circle" height="25" alt="Black and White Portrait of a Man" loading="lazy"/></a> -->
+            <button class="btn btn-outline-dark" type="submit">
+            <i class="fa-regular fa-user"></i>
+            </button>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuAvatar">
+            <li><a class="dropdown-item" href="#">My profile</a></li>
+            <li></li><a class="dropdown-item" href="{% url 'cart' %}">Cart</a></li>
+            <li></li><a class="dropdown-item" href="#">Wishlist</a></li>
+            <li></li><a class="dropdown-item" href="#">Orders</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="{% url 'user_logout' %}">Logout</a></li>
+          </ul>
+        </div>
+      </div>
+      <!-- Right elements -->
+    </div>
+    <!-- Container wrapper -->
+  </nav>
+
+<!-- Navbar Ends-->
+
+<!-- Cart Section Starts -->
+    <section  class="mt-5" style="background-color: #eee; height: 100%;">
+        <div class="container h-100 py-5">
+          <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-10 table">
+      
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-normal mb-0 text-black">My Cart</h3>
+              </div>
+                <!--Product Card Starts   -->
+              {% if cart_items %}
+              {% for i in cart_items %}
+              <div class="card rounded-3 mb-4">
+                <div class="card-body p-4">
+                  <div class="row d-flex justify-content-between align-items-center">
+                    <div class="col-md-2 col-lg-2 col-xl-2">
+                      <img src="{{i.pid.image.url}}" class="img-fluid rounded-3" alt="image">
+                    </div>
+                    <div class="col-md-3 col-lg-3 col-xl-3">
+                      <p class="lead fw-normal mb-2">{{ i.pid.pname }}</p>
+                      <p><span class="text-muted">by {{ i.pid.author }} </span>
+                    </div>
+                    <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
+                      <button class="btn btn-link px-2 decrement-btn" data-url="{{ i.pid.productid }}">
+                        <i class="fas fa-minus"></i>
+                      </button>
+      
+                      <input id="form1" min="0" name="quantity" value="{{ i.quantity }}" type="number" class="form-control form-control-sm"/>
+      
+                      <button class="btn btn-link px-2 increment-btn" data-url="{{ i.pid.productid }}">
+                        <i class="fas fa-plus"></i>
+                      </button>
+                    </div>
+                    <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
+                        <h5 class="mb-0 total-amount">₹ {{ i.total_price}} </h5>
+                        <!-- <p class="text-muted"></p> -->
+                    </div>
+                    <div class="col-md-1 col-lg-1 col-xl-1 text-end">
+                      <a href="{% url 'delete_cart_items' %}?clid={{i.cartlistid}}" class="text-danger"><i class="fas fa-trash fa-lg"></i></a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            
+
+
+                  <!-- Product Card Ends -->
+      
+              <!-- <div class="card mb-4">
+                <div class="card-body p-4 d-flex flex-row">
+                  <div class="form-outline flex-fill">
+                    <input type="text" id="form1" class="form-control form-control-lg" />
+                    <label class="form-label" for="form1">Discound code</label>
+                  </div>
+                  <button type="button" class="btn btn-outline-warning btn-lg ms-3">Apply</button>
+                </div>
+              </div> -->
+      
+              <div class="card">
+                <div class="card-body">
+                <form action="/checkout">
+                  <button type="submit" class="btn btn-warning btn-block btn-lg">Proceed to Pay</button>
+                </form>
+                </div>
+              </div>
+            {% else %}
+           
+         
+              <div class="py-5 text-center d-flex justify-content-bet align-items-center flex-row"> 
+              <lottie-player src="https://assets1.lottiefiles.com/packages/lf20_ry4iluja.json"  background="transparent"  speed="1"  style="width: 500px; height: 500px;"  loop  autoplay></lottie-player>
+
+              <!-- <lottie-player src="https://assets1.lottiefiles.com/packages/lf20_15TIGR.json"  background="transparent"  speed="1"  style="width: 300px; height: 300px;"  loop autoplay></lottie-player> -->
+              
+                      <h2>Your Bag is Empty</h2>
+                
+              </div>
+            
+            {% endif %}
+            </div>
+          </div>
+        </div>
+    </section>
+
+      <footer style="position: sticky;" class="py-2 bg-dark">
+        <div class="container" style="display: flex; justify-content: center;">
+          <p class="m-0 text-center text-white">Copyright &copy;2023</p>
+        </div>
+        
+      </footer>
+      <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.1.0/mdb.min.js"></script>
+
+
+<!-- JS -->
+<script>
+	const cartContainer = document.querySelector('.table');
+	var token = $('input[name=csrfmiddlewaretoken]').val();
+   if(cartContainer){
+	 cartContainer.addEventListener('click' , (e) => {
+    console.log('Entered')
+    console.log(e.target.classList.contains('increment-btn'))
+    console.log(e.target.classList.contains('decrement-btn'))
+		if(e.target.classList.contains('increment-btn')) {
+      console.log('ggg')
+			console.log(e.target.dataset.url);
+      console.log('2345y')
+			$.ajax({
+        
+				method : 'POST',
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken")
+        },
+				url : `/cart_item_increment`,
+				data : {
+					'product_id':e.target.dataset.url,
+					// 'product_qty':product_qty,
+					csrfmiddlewaretoken:token
+				} ,
+        
+				success:function(data){
+					// console.log(data.quantity)
+					// console.log(data.qty)
+					e.target.parentNode.childNodes[3].value = data.quantity;
+					if(data.quantity >= data.qty) {
+						e.target.disabled = true;
+					}
+          e.target.parentNode.parentNode.querySelector('.total-amount').innerHTML = `₹ ${data.total_price}.0`
+					// alertify.success(response.status)
+				}
+			})
+      function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;}
+		}
+		if(e.target.classList.contains('decrement-btn')) {
+      console.log('decrement')
+			// console.log(e.target.dataset.url)
+			$.ajax({
+				method : 'POST',
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken")
+        },
+				url : `/cart_item_decrement`,
+				data : {
+					'product_id':e.target.dataset.url,
+					// 'product_qty':product_qty,
+					csrfmiddlewaretoken:token
+				} ,
+				success:function(data){
+					// console.log()
+				    e.target.parentNode.childNodes[3].value = data.quantity;
+					if(data.quantity < 2) {
+						e.target.disabled = true;
+					}
+          e.target.parentNode.parentNode.querySelector('.total-amount').innerHTML = `₹ ${data.total_price}.0`
+					// document.getElementById("qt").innerText = data.quantity;
+				}
+			})
+      function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;}
+		}
+	 })
+   }
+
+
+
+</script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
+</body>
+</html>

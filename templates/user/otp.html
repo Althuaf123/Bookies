@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/otp.css">
+    <title>OTP verification page</title>
+</head>
+<body>
+    <h1>Enter Your OTP</h1><br>
+    <div class="otp">
+        <form method="POST">
+            {% csrf_token %}
+            {% for x in messages %}
+                <p class="text-danger" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{x}}</p>
+            {% endfor %} 
+            <div class="form-outline flex-fill mb-0">
+                <input type="text" id="form3Example4c" name="1" class="form-control" maxlength="1" required />
+                <input type="text" id="form3Example4c" name="2" class="form-control" maxlength="1" required />
+                <input type="text" id="form3Example4c" name="3" class="form-control" maxlength="1" required />
+                <input type="text" id="form3Example4c" name="4" class="form-control" maxlength="1" required />
+                <input type="text" id="form3Example4c" name="5" class="form-control" maxlength="1" required />
+                <input type="text" id="form3Example4c" name="6" class="form-control" maxlength="1" required />
+                <label class="form-label" for="form3Example4c"></label>
+            </div>
+   
+
+            <br><button style="margin-left: 38%;" type="submit">Submit</button>
+        </form>
+        
+    </div>
+    
+    
+</body>  
+</html>
