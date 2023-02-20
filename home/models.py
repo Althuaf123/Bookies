@@ -55,6 +55,7 @@ class product(models.Model):
     description=models.TextField()
     image=models.ImageField('image',upload_to='products')
     offer = models.PositiveIntegerField(default=0)
+    offerprice  = models.PositiveIntegerField(default=0)
 
 class cart(models.Model):
     cartid = models.AutoField(primary_key=True)

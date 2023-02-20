@@ -11,7 +11,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.1.0/mdb.min.css" rel="stylesheet"/>
 
     
-    <link rel="stylesheet" href="static/adminstyle.css">
+    <link rel="stylesheet" href="/static/adminstyle.css">
 </head>
 <body>
 
@@ -22,13 +22,14 @@
         </div>
 
         <div class="items">
-            <li><i class="fa-solid fa-chart-line"></i></i><a href="#">Dashboard</a></li>
-            <li><i class="fa-regular fa-address-card"></i><a href="#">Profile</a></li>
+            <li><i class="fa-solid fa-chart-line"></i></i><a href="admin_home">Dashboard</a></li>
+            <!-- <li><i class="fa-regular fa-address-card"></i><a href="#">Profile</a></li> -->
             <li><i class="fa-solid fa-users"></i><a href="{% url 'user_management' %}">Users</a></li>
             <li><i class="fa-brands fa-product-hunt"></i><a href="{% url 'product_management' %}">Products</a></li>
             <li><i class="fa-solid fa-boxes-stacked"></i><a href="{% url 'category_management' %}">Category</a></li>
             <li><i class="fa-solid fa-cart-shopping"></i><a href="{% url 'order_management' %}">Orders</a></li>
-            <li><i class="fa-solid fa-gifts"></i><a href="#">Coupons</a></li>
+            <li><i class="fa-solid fa-image"></i><a href="{% url 'banner_management' %}">Banner Management</a></li>
+            <li><i class="fa-solid fa-gifts"></i><a href="{% url 'coupon_management'%}">Coupons</a></li>
         </div>
     </section>
     <section id="interface">
@@ -38,20 +39,51 @@
                     <i class="fa-solid fa-magnifying-glass"></i>
                     <img src="" alt="">
                     <input type="text" placeholder="Search">
-                </div>
+                </div>   
             </div>
+            
             <div class="profile">
                 <a href="{% url 'admin_logout' %}">Log out</a><i class="fa-solid fa-arrow-right-from-bracket"></i>
             </div>
         </div>
-    
+    <div class="container">
+        <div class="col-md-10">
+
+       
+        <div>
+            <canvas id="myChart"></canvas>
+        </div>
+    </div>
+</div>
         
- 
 </section>
-    <script
-  type="text/javascript"
-  src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.1.0/mdb.min.js"
-></script>
-    
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.1.0/mdb.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('myChart');
+      
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: ['Red', 'Blue', 'Yellow', 'Green'],
+            datasets: [{
+              label: 'Total Sales',
+              data: [12, 19, 3, 5, 2, 3],
+              borderWidth: 01,
+              borderColor:'black',
+              backgroundColor:['#9ca19d'],
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+      </script>
+
+
 </body>
 </html>

@@ -22,8 +22,7 @@
         </div>
 
         <div class="items">
-            <li><i class="fa-solid fa-chart-line"></i></i><a href="#">Dashboard</a></li>
-            <li><i class="fa-regular fa-address-card"></i><a href="#">Profile</a></li>
+            <li><i class="fa-solid fa-chart-line"></i></i><a href="admin_home">Dashboard</a></li>
             <li><i class="fa-solid fa-users"></i><a href="{% url 'user_management' %}">Users</a></li>
             <li><i class="fa-brands fa-product-hunt"></i><a href="{% url 'product_management' %}">Products</a></li>
             <li><i class="fa-solid fa-boxes-stacked"></i><a href="{% url 'category_management' %}">Category</a></li>
@@ -65,9 +64,9 @@
  <!-- User Details Starts -->
         <div class="col-md-10 offset-md-1 my-2">
             <form action="addproduct">
-                <button type="submit" class="btn btn-outline-success btn-rounded   btn-sm" data-mdb-ripple-color="#000000"> Add Product </button>
+                <button type="submit" class="btn btn-outline-success btn-sm" data-mdb-ripple-color="#000000"> Add Product </button>
             </form>
-            <div class="card">
+            <br><div class="card">
               <div class="card-body">
                 
                 <table class="table table-striped">
@@ -79,6 +78,8 @@
                       <th>Image</th>
                       <th>Price</th>
                       <th>Stock</th>
+                      <th>Offer (%)</th>
+                      <th>Action</th>
                       
                     </tr>
                   </thead>
@@ -87,21 +88,50 @@
                       <tr>
                         <td>{{forloop.counter}}</td>
                         <td>{{i.pname}}</td>
-                        <td><img width="90px" height="90px" src="{{i.image.url}}" alt="Not available"></td>
-                        <td>{{i.price}}</td>
-                        <td>{{i.stock}}</td>
-                        
+                        <td><img width="90px" height="90px" style="border-radius: 5px;" src="{{i.image.url}}" alt="Not available"></td>
                         <td>
-                          <a href="{% url 'delete_product' %}?pid={{i.productid}}" class="btn btn-danger md-sm">Delete</a><br>
-                          
+                          {% if i.offer == 0 %}
+                          Rs. {{i.price}}
+                          {% else %}
+                          MRP:
+                          Rs. {{i.price}}
+                          Offer:
+                          Rs. {{i.offerprice}}
+
+                         {% endif %}
+                        </td>
+                        <td>{{i.stock}}</td>
+                        <td>
+                          <form method="POST" action="product_offer">
+                            {% csrf_token %}
+                          <input type="hidden" value="{{i.productid}}" name="pid" id="pid">
+                          <input name="offer"  id="offer" value="{{i.offer}}" type="text" placeholder=" Offer %"><br>
+                          <br><button class="btn btn-outline-success"><i class="fa-solid fa-check"></i></button>
+                        </form>
+                        </td>
+                        <td>
+                          <a href="{% url 'delete_product' %}?pid={{i.productid}}" class="btn btn-outline-danger md-sm"><i class="fa-solid fa-trash-can"></i></a><br>
+                          <br><a href="{% url 'update_product' %}?pid={{i.productid}}" class="btn btn-outline-success md-sm"><i class="fa-regular fa-pen-to-square"></i></a>  
                        </td>
-                       <td><a href="{% url 'update_product' %}?pid={{i.productid}}" class="btn btn-success md-sm">Edit</a></td>   
                       </tr>
                     {% endfor %}
                   </tbody>
                 </table>
               </div>
             </div>
+            <br></br/>
+                <!-- Pagination -->
+                {% if orders.has_previous %}
+                  <a href="?page=1">&laquo; First</a>
+                  <a href="?page={{ orders.previous_page_number }}">Previous</a>
+                {% endif %}
+
+                Page {{ orders.number }} of {{ orders.paginator.num_pages }}
+
+                {% if orders.has_next %}
+                  <a href="?page={{ orders.next_page_number }}">Next</a>
+                  <a href="?page={{ orders.paginator.num_pages }}">Last &raquo;</a>
+                {% endif %}
           </div>   
 <!--User Details Ends  -->
 </section>

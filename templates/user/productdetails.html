@@ -53,14 +53,16 @@
                 <p class="offer text-center"></p>
                 <h2>{{details.pname}}</h2>
                 <p>by: {{details.author}}</p>
+                {% if details.offer == 0 %}
                 <p class="price">₹{{details.price}}</p>
+                {% else %}
+                <s class="text-muted">MRP. ₹{{details.price}}</s>
+                <br><p class="price">Offer Price: ₹{{details.offerprice}}</p>
                 <p><b>Publisher: </b>{{details.publisher}}</p>
-                <!-- <label>Quantity:</label>
-                <input type="number" value="1"> -->
-                <!-- <button type="button" class="btn btn-default cart" > Add to Cart</button> -->
+                {% endif %}
                 <a href="{% url 'add_to_cart' %}?pid={{ details.productid }}" class="btn btn-default cart">Add to Cart</a>
-                <button type="button" class="btn btn-default buy" > Buy Now</button><br>
-                <h5>About:</h5>
+                <!-- <button type="button" class="btn btn-default buy" > Buy Now</button><br> -->
+                <br><br><h5>About:</h5>
                 <p>{{details.description}}</p>
             </div>
             

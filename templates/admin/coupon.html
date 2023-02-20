@@ -23,8 +23,7 @@
         </div>
 
         <div class="items">
-            <li><i class="fa-solid fa-chart-line"></i></i><a href="#">Dashboard</a></li>
-            <li><i class="fa-regular fa-address-card"></i><a href="#">Profile</a></li>
+            <li><i class="fa-solid fa-chart-line"></i></i><a href="admin_home">Dashboard</a></li>
             <li><i class="fa-solid fa-users"></i><a href="{% url 'user_management' %}">Users</a></li>
             <li><i class="fa-brands fa-product-hunt"></i><a href="{% url 'product_management' %}">Products</a></li>
             <li><i class="fa-solid fa-boxes-stacked"></i><a href="{% url 'category_management' %}">Category</a></li>
@@ -68,8 +67,11 @@
       {% endif %}
 
  <!-- Category Details Starts -->
+
         <div class="col-md-6 offset-md-3 my-3">
-            <div class="card">
+         <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal">Add Coupon</button><br>
+
+            <br><div class="card">
               <div class="card-body">
                 
                 <table class="table table-striped">
@@ -99,7 +101,7 @@
           </div>   
 <!--Category Details Ends  -->
 <!-- Button trigger modal -->
-    <button type="button" class="btn btn-success md-sm" data-bs-toggle="modal" data-bs-target="#exampleModal">Add Coupon</button>
+   
   
   <!-- Modal -->
   <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">

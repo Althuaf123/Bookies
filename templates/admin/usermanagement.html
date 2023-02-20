@@ -22,8 +22,7 @@
         </div>
 
         <div class="items">
-            <li><i class="fa-solid fa-chart-line"></i></i><a href="#">Dashboard</a></li>
-            <li><i class="fa-regular fa-address-card"></i><a href="#">Profile</a></li>
+            <li><i class="fa-solid fa-chart-line"></i></i><a href="admin_home">Dashboard</a></li>
             <li><i class="fa-solid fa-users"></i><a href="{% url 'user_management' %}">Users</a></li>
             <li><i class="fa-brands fa-product-hunt"></i><a href="{% url 'product_management' %}">Products</a></li>
             <li><i class="fa-solid fa-boxes-stacked"></i><a href="{% url 'category_management' %}">Category</a></li>
@@ -38,7 +37,9 @@
                 <div class="search">
                     <i class="fa-solid fa-magnifying-glass"></i>
                     <img src="" alt="">
-                    <input type="text" placeholder="Search">
+                    <form action="user_management">
+                    <input value="{{keyword}}" name="search" type="text"  placeholder="Search">
+                  </form>
                 </div>   
             </div>
             
@@ -86,6 +87,19 @@
                 </table>
               </div>
             </div>
+            <br></br/>
+                <!-- Pagination -->
+                {% if orders.has_previous %}
+                  <a href="?page=1">&laquo; First</a>
+                  <a href="?page={{ orders.previous_page_number }}">Previous</a>
+                {% endif %}
+
+                Page {{ orders.number }} of {{ orders.paginator.num_pages }}
+
+                {% if orders.has_next %}
+                  <a href="?page={{ orders.next_page_number }}">Next</a>
+                  <a href="?page={{ orders.paginator.num_pages }}">Last &raquo;</a>
+                {% endif %}
           </div>   
 <!--User Details Ends  -->
 </section>

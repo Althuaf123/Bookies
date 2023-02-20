@@ -19,10 +19,12 @@ from .models import coupon
 from .forms import ProductForm,AddBanner
 import datetime
 import random
+import calendar
+from django.db.models import Count
+from django.db.models.functions import ExtractYear, ExtractMonth
 from random import randint
 import requests
 from requests import request
-# from .models import category as c
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
 from django.contrib import messages
@@ -77,11 +79,24 @@ def userprofile(request):
 
 @never_cache   
 def homepage(request):
-    if 'email' in request.session:  
-        details=p.objects.all()
-        cat=c.objects.all()
-        ban=banner.objects.all()
-        return render(request,'user/homepage.html',{'details': details, 'cat': cat, 'ban': ban}) 
+    if 'email' in request.session:
+        if 'search' in request.GET:
+            search = request.GET['search']
+            prod = p.objects.filter(pname__icontains = search)
+            cat=c.objects.all()
+            ban=banner.objects.all()
+            paginator = Paginator(prod, 5)
+            page = request.GET.get('page')
+            details = paginator.get_page(page)
+            return render(request,'user/homepage.html',{'details': details, 'cat': cat, 'ban': ban, 'keyword' : search})
+        else:
+            prod=p.objects.all()
+            cat=c.objects.all()
+            ban=banner.objects.all()
+            paginator = Paginator(prod, 5)
+            page = request.GET.get('page')
+            details = paginator.get_page(page)
+            return render(request,'user/homepage.html',{'details': details, 'cat': cat, 'ban': ban}) 
     else:
         return render(request,'user/userlogin.html')
     
@@ -161,7 +176,7 @@ def landingpage(request):
         if 'search' in request.GET:
             search=request.GET['search']
             details=p.objects.filter(pname__icontains=search)
-            return render(request,'user/landingpage.html',{'details': details})
+            return render(request,'user/landingpage.html',{'details': details,'keyword': search})
             
         else:
             details=p.objects.all()
@@ -185,6 +200,7 @@ def product_details(request):
     
 def admin_home(request):
     if 'mail' in request.session:
+        
         return render(request,'admin/adminhome.html')
     
     else:
@@ -193,20 +209,15 @@ def admin_home(request):
 @never_cache
 def admin_login(request):
     if 'mail' in request.session:
-        return render(request,'admin/adminhome.html')
+        return redirect('admin_home')
     if request.method == 'POST':
         mail = request.POST['mail']
         password = request.POST['password']
         ad=admin.objects.filter(mail=mail,password=password).count()
-        # bd=authenticate(request,username=username, password=password)
         if ad==1 :
             adminok=admin.objects.get(mail=mail,password=password)
             request.session['mail']=adminok.mail
-            return render(request,"admin/adminlogin.html")
-        # elif bd is not None:
-        #     print("admin success")
-        #     request.session['username']=adminok.username
-        #     return render(request,"admin/adminlogin.html")
+            return redirect('admin_home')
         else:
             messages.error(request,'Invalid Username/Password')
             return redirect('/admin_login')
@@ -218,10 +229,14 @@ def user_management(request):
     if 'mail' in request.session:
         if 'search' in request.GET:
             search=request.GET['search']
-            details=u.objects.filter(name__icontains=search)
+            users=u.objects.filter(email__icontains=search)
+            paginator = Paginator(users, 5)
+            page = request.GET.get('page')
+            details = paginator.get_page(page)
+            return render(request,'admin/usermanagement.html',{'details': details,'keyword':search})
         else:
             details=u.objects.all()
-        return render(request,'admin/usermanagement.html',{'details': details})
+            return render(request,'admin/usermanagement.html',{'details': details})
     else:
         return render(request,'admin/adminlogin.html')
     
@@ -246,12 +261,17 @@ def product_management(request):
     if 'mail' in request.session:
         if 'search' in request.GET:
             search=request.GET['search']
-            details=p.objects.filter(pname__icontains=search)
-            return render(request,'admin/productmanage.html',{'details': details})
+            prods=p.objects.filter(pname__icontains=search)
+            paginator = Paginator(prods, 5)
+            page = request.GET.get('page')
+            details = paginator.get_page(page)
+            return render(request,'admin/productmanage.html',{'details': details, 'keyword': search})
         else:
-            details=p.objects.all()
-            cat=c.objects.all()
-            return render(request,'admin/productmanage.html',{'details': details,'cat':cat})
+            prods=p.objects.all()
+            paginator = Paginator(prods, 5)
+            page = request.GET.get('page')
+            details = paginator.get_page(page)
+            return render(request,'admin/productmanage.html',{'details': details})
     else:
         return render(request,'admin/adminlogin.html')
 
@@ -362,10 +382,17 @@ def category_management(request):
     if 'mail' in request.session:
         if 'search' in request.GET:
             search=request.GET['search']
-            cat=c.objects.filter(cname__icontains=search)
+            items=c.objects.filter(cname__icontains=search)
+            paginator = Paginator(items, 5)
+            page = request.GET.get('page')
+            cat = paginator.get_page(page)
+            return render(request,'admin/categorymanage.html',{'cat': cat, 'keyword': search})
         else:
-           cat=c.objects.all()
-        return render(request,'admin/categorymanage.html',{'cat': cat})
+            items=c.objects.all()
+            paginator = Paginator(items, 5)
+            page = request.GET.get('page')
+            cat = paginator.get_page(page)
+            return render(request,'admin/categorymanage.html',{'cat': cat})
     else:
         return redirect('admin_login')
     # if 'mail' in request.session:
@@ -582,10 +609,10 @@ def cash_on_delivery(request):
         stocc = int(stoc.stock) - int(dataq)
         p.objects.filter(productid = datap.productid).update(stock=stocc)
     items.delete()
-
+    return render(request, 'user/ordersuccessfull.html')
     # order_date=datetime.now(), 
     # return redirect('order_success', order_id=order_id)
-    return render(request, 'user/ordersuccessfull.html')
+   
 
 # def order_success(request, order_id):
 #     order = o.objects.get(order_id=order_id) 
@@ -612,7 +639,7 @@ def order_management(request):
             paginator = Paginator(orders, 5)
             page = request.GET.get('page')
             order = paginator.get_page(page)
-            return render(request,'admin/ordermanagement.html',{'orders': order})
+            return render(request,'admin/ordermanagement.html',{'orders': order, 'keyword': search})
         else:
             orders=ol.objects.all()
             paginator = Paginator(orders, 5)
@@ -670,7 +697,6 @@ def cart_item_increment(request):
     # total = 0
     # for item in cart_list:
     #     total += item.total_price
-    print(cart_item.quantity)
     return JsonResponse({'quantity': cart_item.quantity,'total_price':cart_item.total_price })
 
 
@@ -693,7 +719,6 @@ def cart_item_decrement(request):
         # total = 0
         # for item in cart_list:
         #     total += item.total_price
-        print(cart_item.quantity)
         return JsonResponse({'quantity': cart_item.quantity,'total_price':cart_item.total_price })
 
 # Increasing the quantity of the item in the cart
@@ -745,11 +770,15 @@ def order_history(request):
     if not user_id:
         return redirect('user_login')
     else:
-        orders = ol.objects.filter(uid=user_id)
+        ord = ol.objects.filter(uid=user_id)
         orr = []
-        for order in orders:
+        for order in ord:
             orr.append(o.objects.get(orderid=order.oid.orderid))
-        return render(request, 'user/orderhistory.html',{"orders":orders,'orr':orr})
+        paginator = Paginator(ord, 6)
+        page = request.GET.get('page')
+        orders = paginator.get_page(page)
+
+        return render(request, 'user/orderhistory.html',{"orders":orders,'orr':order})
 # Admin Side
 def order_details(request):
     orid = request.GET['orid']
@@ -1033,11 +1062,36 @@ def product_offer(request):
         price = pro.price
         disc = int(price)*int(offer)/100
         offerprice = int(price)-int(disc)
-        p.objects.filter(productid = pid).update(offerprice = offerprice)
+        p.objects.filter(productid = pid).update(offer = offer , offerprice = offerprice)
         return redirect('product_management')
     else:
         messages.error(request,'Something Went Wrong')
         return redirect('product_management')
+    
+def category_offer(request):
+    if request.POST:
+        cid = request.POST['cid']
+        offer = request.POST['offer']
+        c.objects.filter(categoryid = cid).update(offer = offer)
+        pros = p.objects.filter(cid = cid)
+        for pro in pros:
+            print (pro)
+            datap = pro.productid
+            datac = pro.cid.offer
+            datapr = pro.price
+            datao = int (datapr)-(int(datapr)*int(datac)/100)
+            p.objects.filter(productid = datap).update(offerprice = datao, offer = offer)
+            print(datapr)
+            print(datao)
+            print(datac)
+        return redirect('category_management')
+    else:
+         messages.error(request,'Something Went Wrong')
+         return redirect('category_management')
+
+
+
+
     
 def return_order(request):
     olid = request.GET['olid']

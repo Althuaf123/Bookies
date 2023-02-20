@@ -38,10 +38,12 @@
                             </ul>
                         </li>
                         <!-- Search bar -->
+                        <form action="homepage">
                         <div class="input-group">
-                            <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
-                            <button type="button" class="btn btn-outline-primary">search</button>
-                          </div>
+                            <input name="search" id="search" type="text" value="{{keyword}}" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
+                            <button type="button" class="btn btn-outline-primary">search</button>           
+                        </div>
+                        </form>
                         <!-- Search bar ends -->
                     </ul>
                     <form class="d-flex">
@@ -57,8 +59,8 @@
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{% url 'cart' %}">Cart</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#!">Wishlist</a></li>
-                                <li><hr class="dropdown-divider"></li>
+                                <!-- <li><a class="dropdown-item" href="#!">Wishlist</a></li>
+                                <li><hr class="dropdown-divider"></li> -->
                                 <li><a class="dropdown-item" href="{% url 'order_history' %}">Orders</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{% url 'user_logout' %}">Log Out</a></li>
@@ -71,24 +73,19 @@
         <!-- Nav bar ends -->
         <!-- Header-->
         <!-- <header class="bg-dark py-5"> -->
-        <header class="dark py-5" >
-            <div id="carouselcontrols" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-inner">
-                    {% for b in ban %}
-                  <div class="carousel-item active">
-                    <img src="{{b.image.url}}" class="d-block w-100" alt="...">
-                  </div>
-                  {% endfor %}
-                </div>
-              </div>
-            <!-- <div class="container px-4 px-lg-5 my-5">
+            {% for i in ban %}
+            <header class="py-5"  style="background-image: url('{{i.image.url}}');; background-size: cover;">
+
+            
+            <div class="container px-4 px-lg-5 my-5">
                
-                <div  class="text-center text-white">
+                <div  class="text-center text-black">
                     <h1 class="display-4 fw-bolder">Bookies.Com</h1>
-                    <p class="lead fw-normal text-white-50 mb-0">Never put a fullstop for your reading</p>
+                    <p class="lead fw-normal text-black-50 mb-0">Never put a fullstop for your reading</p>
                 </div>
-            </div> -->
+            </div>
         </header>
+        {% endfor %}
         <!-- Header ends -->
         <!-- Section-->
         <section class="py-5">

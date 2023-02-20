@@ -23,8 +23,7 @@
         </div>
 
         <div class="items">
-            <li><i class="fa-solid fa-chart-line"></i></i><a href="#">Dashboard</a></li>
-            <li><i class="fa-regular fa-address-card"></i><a href="#">Profile</a></li>
+            <li><i class="fa-solid fa-chart-line"></i></i><a href="admin_home">Dashboard</a></li>
             <li><i class="fa-solid fa-users"></i><a href="{% url 'user_management' %}">Users</a></li>
             <li><i class="fa-brands fa-product-hunt"></i><a href="{% url 'product_management' %}">Products</a></li>
             <li><i class="fa-solid fa-boxes-stacked"></i><a href="{% url 'category_management' %}">Category</a></li>
@@ -47,17 +46,19 @@
             </div>
             
             <div class="profile">
-                <a href="{% url 'admin_logout' %}">Log out</a><i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <a href="{% url 'admin_logout' %}">Log out</a>   <i class="fa-solid fa-arrow-right-from-bracket"></i>
             </div>
         </div>
 
         {% for x in messages %}
           <p class="text-success" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{x}}</p>
         {% endfor %}
+        
 
  <!-- Category Details Starts -->
         <div class="col-md-6 offset-md-3 my-3">
-            <div class="card">
+          <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal">Add Category</button><br>
+            <br><div class="card">
               <div class="card-body">
                 
                 <table class="table table-striped">
@@ -66,6 +67,7 @@
                     <tr>
                       <th>Sl.No.</th>
                       <th>Category Name</th>
+                      <th>Offer (%)</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -74,8 +76,17 @@
                       <td>{{forloop.counter}}</td>
                       <td>{{i.cname}}</td>
                       <td>
-                        <a href="{% url 'delete_category' %}?cid={{i.categoryid}}" class="btn btn-danger md-sm">Delete</a>
-                        <a href="{% url 'update_category' %}?cid={{i.categoryid}}" class="btn btn-success md-sm">Edit</a>
+                        <form method="POST" action="category_offer">
+                          {% csrf_token %}
+                        <input type="hidden" value="{{i.categoryid}}" name="cid" id="cid">
+                        <input name="offer"  id="offer" value="{{i.offer}}" type="text" placeholder=" Offer in %">
+                        <button class="btn btn-outline-success"><i class="fa-solid fa-check"></i></button>
+                      </form>
+                      </td>
+                      
+                      <td>
+                        <a href="{% url 'delete_category' %}?cid={{i.categoryid}}" class="btn btn-danger md-sm"><i class="fa-solid fa-trash-can"></i></a>
+                        <a href="{% url 'update_category' %}?cid={{i.categoryid}}" class="btn btn-success md-sm"><i class="fa-regular fa-pen-to-square"></i></a>
                       </td>   
                     </tr> 
                     {% endfor %}
@@ -83,10 +94,22 @@
                 </table>
               </div>
             </div>
+            <br></br/>
+                <!-- Pagination -->
+                {% if orders.has_previous %}
+                  <a href="?page=1">&laquo; First</a>
+                  <a href="?page={{ orders.previous_page_number }}">Previous</a>
+                {% endif %}
+
+                Page {{ orders.number }} of {{ orders.paginator.num_pages }}
+
+                {% if orders.has_next %}
+                  <a href="?page={{ orders.next_page_number }}">Next</a>
+                  <a href="?page={{ orders.paginator.num_pages }}">Last &raquo;</a>
+                {% endif %}
           </div>   
 <!--Category Details Ends  -->
 <!-- Button trigger modal -->
-    <button type="button" class="btn btn-success md-sm" data-bs-toggle="modal" data-bs-target="#exampleModal">Add Category</button>
   
   <!-- Modal -->
   <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
