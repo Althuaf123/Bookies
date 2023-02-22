@@ -27,21 +27,11 @@
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
                         <li class="nav-item"><a class="nav-link active" aria-current="page" href="{% url 'homepage' %}">Home</a></li>
                         <li class="nav-item"><a class="nav-link active" href="{% url 'productpage' %}">Shop</a></li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Category</a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="#!">All Products</a></li>
-                                <li><hr class="dropdown-divider" /></li>
-                                {% for i in cat%}
-                                <li><a class="dropdown-item" href="#!">{{i.cname}}</a></li>
-                                {% endfor %}
-                            </ul>
-                        </li>
+                        
                         <!-- Search bar -->
                         <form action="homepage">
                         <div class="input-group">
-                            <input name="search" id="search" type="text" value="{{keyword}}" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
-                            <button type="button" class="btn btn-outline-primary">search</button>           
+                            <input name="search" id="search" type="text" value="{{keyword}}" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />       
                         </div>
                         </form>
                         <!-- Search bar ends -->

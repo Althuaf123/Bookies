@@ -76,6 +76,13 @@ class orders(models.Model):
     # order_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     order_id = models.CharField(max_length=25)
 
+class payment(models.Model):
+    paymentid = models.AutoField(primary_key=True)
+    oid = models.ForeignKey(orders, on_delete=models.CASCADE, null=False)
+    mode = models.CharField(max_length=10, default= 'COD')
+    status = models.CharField(max_length=12, default='Pending')
+
+
 class order_list(models.Model):
     orderlistid = models.AutoField(primary_key=True)
     oid = models.ForeignKey(orders, on_delete=models.CASCADE,null=False)
@@ -91,11 +98,6 @@ class order_list(models.Model):
 
 
 
-class payment(models.Model):
-    paymentid = models.AutoField(primary_key=True)
-    oid = models.ForeignKey(orders, on_delete=models.CASCADE, null=False)
-    mode = models.CharField(max_length=10, default= 'COD')
-    status = models.CharField(max_length=12, default='Pending')
 
 class banner(models.Model):
     bannerid = models.AutoField(primary_key=True)

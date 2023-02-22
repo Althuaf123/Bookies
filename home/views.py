@@ -1,28 +1,17 @@
 from django.shortcuts import render
 
 # Create your views here.
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, HttpResponse
 from django.views.decorators.cache import never_cache
-from .models import Users as u
-from .models import admin
-from .models import product as p
-from .models import category as c
-from .models import cart as car
-from .models import cart_list as cl
-from .models import Address as a
-from .models import orders as o
-from .models import order_list as ol
+from .models import Users as u, admin, product as p, category as c, cart as car, cart_list as cl, Address as a, orders as o, order_list as ol, payment as pay, banner, coupon
 from django.core.paginator import Paginator                                
-from .models import payment as pay
-from .models import banner
-from .models import coupon
 from .forms import ProductForm,AddBanner
 import datetime
 import random
-import calendar
-from django.db.models import Count
-from django.db.models.functions import ExtractYear, ExtractMonth
 from random import randint
+import calendar
+from django.db.models import Count, Q, F
+from django.db.models.functions import ExtractYear, ExtractMonth
 import requests
 from requests import request
 from django.contrib.auth.hashers import make_password
@@ -33,11 +22,17 @@ from django.core.mail import send_mail
 from datetime import datetime
 import uuid
 from random import randint
-from django.db.models import Q
 import json
 from django.http.response import JsonResponse
+import openpyxl
+from openpyxl import Workbook
+import pytz
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from io import StringIO
 
 # Create your views here.
+
 
 def user_login(request):
     if 'email' in request.session:
@@ -108,11 +103,8 @@ def user_signup(request):
         email=request.POST['email']
         password=request.POST['password']
         confirm_password=request.POST['confirm_password']
-        # u.objects.create(name=name,phone=phone,email=email,password=password)
-        # return render(request,"user/otp.html")
         if password == confirm_password:    
             user=u.objects.create(name=name,email=email,password=password)
-            # user.password = make_password(user.password)
             user.save()
             secret=pyotp.random_base32()
             totp=pyotp.TOTP(secret,interval=300)
@@ -131,14 +123,11 @@ def user_signup(request):
     
 def otp_verification(request,userid,secret):
     if request.POST:
-        print(4)
         totp=pyotp.TOTP(secret,interval=300)
         print(totp.now())
         try:
-            print(5)
             user=u.objects.get(userid=userid)
         except u.DoesNotExist:
-            print(6)
             messages.error(request,'user not found')
             return redirect('user_signup')
         code=request.POST['1']+request.POST['2']+request.POST['3']+request.POST['4']+request.POST['5']+request.POST['6']
@@ -173,25 +162,29 @@ def landingpage(request):
     if 'email' in request.session:
         return redirect('homepage')
     else:
+        ban=banner.objects.all()
         if 'search' in request.GET:
             search=request.GET['search']
             details=p.objects.filter(pname__icontains=search)
-            return render(request,'user/landingpage.html',{'details': details,'keyword': search})
+            return render(request,'user/landingpage.html',{'details': details,'keyword': search,'ban': ban})
             
         else:
             details=p.objects.all()
             cat=c.objects.all()
-            return render(request,'user/landingpage.html',{'details': details, 'cat': cat})
+            return render(request,'user/landingpage.html',{'details': details, 'cat': cat,'ban': ban})
 def productpage(request):
         if 'search' in request.GET:
             search=request.GET['search']
             details=p.objects.filter(pname__icontains=search)
-            return render(request,'user/productpage.html',{'details': details, 'keyword': search})
+            cat=c.objects.all()
+            return render(request,'user/productpage.html',{'details': details,'cat': cat, 'keyword': search})
             
         else:
             details=p.objects.all()
             cat=c.objects.all()
             return render(request,'user/productpage.html',{'details': details, 'cat': cat})
+        
+
 def product_details(request):
     pid=request.GET["pid"]
     details=p.objects.get(productid=pid)
@@ -200,30 +193,76 @@ def product_details(request):
     
 def admin_home(request):
     if 'mail' in request.session:
-        # data=ol.objects.all()
-        # for i in data:
-        #     print(datetime(i.order_date))
-
-        # orders_months=ol.objects.annotate(month=ExtractMonth('order_date')).values('month').annotate(count=Count('orderlistid')).values('month','count')
-        # print(orders_months)
-        # months=[]
-        # total_orders=[]
-        # for i in orders_months:
-        #     months.append(calendar.month_name[i['month']])
-        #     total_orders.append(i['count'])
-        # order=ol.objects.order_by('order_date')[:2]
-        # print(months)
-        # print(total_orders)
-        # context={
-        #     'total_orders':total_orders,
-        #     'months':months,
-        #     'order':order,
-        # }
-        # return render(request,'admin/adminhome.html',{'context':context})
-        return render(request,'admin/adminhome.html')
+        orders_months=ol.objects.annotate(month=ExtractMonth('order_date')).values('month').annotate(count=Count('orderlistid')).values('month','count')
+        months=[]
+        total_orders=[]
+        for i in orders_months:
+            months.append(calendar.month_name[i['month']])
+            total_orders.append(i['count'])
+        order=ol.objects.order_by('order_date')[:2]
+        context={
+            'total_orders':total_orders,
+            'months':months,
+            'order':order,
+        }
+        return render(request,'admin/adminhome.html',{'context':context})
     
     else:
         return redirect('admin_login')
+    
+def salesreport(request):
+    if request.POST:
+        fromdate = request.POST['fromdate']
+        fromdt = datetime.strptime(fromdate, '%Y-%m-%d').date()
+        todate = request.POST['todate']
+        todt = datetime.strptime(todate, '%Y-%m-%d').date()
+        currentdate = datetime.today().date()
+        if (currentdate >= fromdt) and (currentdate >= todt) and (fromdt < todt):
+            if 'pdf' in request.POST:
+                data = ol.objects.filter(order_date__range=[fromdate, todate])
+                print(data)
+                template_path = 'admin/report.html'
+                context = {'data': data,
+                           'fromdate': fromdate, 'todate': todate}
+                # Create a Django response object, and specify content_type as pdf
+                response = HttpResponse(content_type='application/pdf')
+                response['Content-Disposition'] = 'attachment; filename="salesreport.pdf"'
+                # find the template and render it.
+                template = get_template(template_path)
+                html = template.render(context)
+
+                # create a pdf
+                pisa_status = pisa.CreatePDF(
+                    html, dest=response)
+                # if error then show some funny view
+                if pisa_status.err:
+                    return HttpResponse('We had some errors <pre>' + html + '</pre>')
+                return response
+            elif 'excel' in request.POST:
+                orders = ol.objects.filter(order_date__range=[fromdt, todt]).order_by('order_date')
+                response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                response['Content-Disposition'] = 'attachment; filename=Report.xlsx'
+                wb = openpyxl.Workbook()
+                ws = wb.active
+                ws.append(['Order Id', 'User' , 'Order Status' , 'Order Total' , 'Order Date',])
+                for order in orders:
+                    date = order.order_date.astimezone(pytz.utc).replace(tzinfo=None)
+                    ws.append([order.order_lid,order.uid.email,order.status, order.total_price,date,])
+                file_name = "sales_report.xlsx"
+                wb.save(file_name)
+                with open(file_name, "rb") as f:
+                    response = HttpResponse(f.read(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    response["Content-Disposition"] = f"attachment; filename={file_name}"
+                    return response
+
+            else:
+                messages.error(request, 'Invalid request detected')
+                return redirect('admin_home')
+        else:
+            messages.warning(request, 'Please provide the date in a valid format')
+            return redirect('admin_home')
+    else:
+        return redirect('admin_home')
 
 @never_cache
 def admin_login(request):
@@ -254,7 +293,10 @@ def user_management(request):
             details = paginator.get_page(page)
             return render(request,'admin/usermanagement.html',{'details': details,'keyword':search})
         else:
-            details=u.objects.all()
+            use=u.objects.all()
+            paginator = Paginator(use, 5)
+            page = request.GET.get('page')
+            details = paginator.get_page(page)
             return render(request,'admin/usermanagement.html',{'details': details})
     else:
         return render(request,'admin/adminlogin.html')
@@ -324,46 +366,6 @@ def updateproduct(request):
     return redirect('product_management')
     
 def addproduct(request):
-#     if 'mail' in request.session:
-#         cat=c.objects.all()
-#         form = ProductForm()
-#         return render(request,"admin/addproduct.html", {'cat':cat})
-#     else:
-#         return redirect('admin_login')
-    
-# def addproduct(request):
-#     if 'mail' in request.session:
-#         form=ProductForm()
-#         if request.method=='POST':
-#             form=ProductForm(request.POST)
-#             add_pname=request.POST.get("add_pname")
-#             add_price=request.POST.get("add_price")
-#             add_stock=request.POST.get("add_stock")
-#             add_author=request.POST.get("add_author")
-#             add_publisher=request.POST.get("add_publisher")
-#             add_category=request.POST.get("add_category")
-#             add_description=request.POST.get("add_description")
-#             if form.is_valid():
-#                 main_image = form.cleaned_data('main_image')
-#                 print(main_image)
-#                 form.save()
-#                 p.objects.create(image=main_image)
-            
-#             catid=c.objects.get(categoryid=add_category)
-
-#             i=p()
-#             i.pname=add_pname
-#             i.price=add_price
-#             i.stock=add_stock
-#             i.author=add_author
-#             i.publisher=add_publisher
-#             i.cid=catid
-#             i.description=add_description
-#             # i.image=main_image
-#             i.save()
-#             return redirect('product_management')
-#     else:
-#         return render(request,'admin/admin_login.html')
     product_form = ProductForm()
     if request.method == 'POST':
         product_form = ProductForm(request.POST or None, request.FILES )
@@ -380,11 +382,6 @@ def addproduct(request):
             author = product_form.cleaned_data['author']
             publisher = product_form.cleaned_data['publisher']
             p.objects.create(pname=name, cid=category, image=main_image, description=description, price=price, stock=stock,author=author,publisher=publisher)
-            # print(name)
-            # print(category)
-            # print(price)
-            # print(main_image)
-            # print(publisher)
             messages.success(request, "Product Added Successfully")
             return redirect('product_management')
         else:
@@ -414,11 +411,6 @@ def category_management(request):
             return render(request,'admin/categorymanage.html',{'cat': cat})
     else:
         return redirect('admin_login')
-    # if 'mail' in request.session:
-    #     cat=c.objects.all()
-    #     return render(request,'admin/categorymanage.html',{'cat': cat})
-    # else:
-    #     return redirect('admin_login')
     
 def add_category(request):
     if 'mail' in request.session:
@@ -427,18 +419,25 @@ def add_category(request):
         return redirect('admin_login')
 
 def addcategory(request):
-     if 'mail' in request.session:
+    if 'mail' in request.session:
         if request.method=='POST':
             add_cname=request.POST.get("add_cname")
+            cat = c.objects.filter(categoryname=add_cname).count()
+            if cat > 0:
+                messages.error(request, "Category already exist")
+                return redirect('category_management')
+            else:
+                i=c()
+                i.cname=add_cname
+                i.save()
 
-            i=c()
-            i.cname=add_cname
-            i.save()
-
-            return redirect('category_management')
-
+                return redirect('category_management')
         else:
-            return render(request,'admin/admin_login.html')
+                messages.error(request, "Something went wrong. Try again later")
+                return redirect('category_management')
+
+    else:
+        return render(request,'admin/admin_login.html')
 
 def delete_category(request):
     cid=request.GET["cid"]
@@ -461,8 +460,6 @@ def updatecategory(request):
     messages.success(request, 'Updated!!!')
     return redirect('category_management')
 
-# def order_management(request):
-#     return render(request, 'admin/ordermanagement.html')
 
 def admin_logout(request):
     if 'mail' in request.session:
@@ -497,26 +494,35 @@ def checkout(request):
     if 'coupcode' in request.GET:
         coupcode = request.GET['coupcode']
         comp = coupon.objects.get(coupname = coupcode)
+        coup = None
         if comp:
+            coup = coupcode
             cprice = int(comp.price)
             total_amount -= cprice
-            print(total_amount)
-            print(cprice)
+            
         else:
             messages.warning(request, 'Invalid Coupon Code')
             return render(request,"user/checkout.html")
-    
-
-    context = {
+        context = {
         "cart_items": cart_items,
         "address": address,
         "total_amount": total_amount,
-        # "coupcode": coupcode,
-        # "cprice" : cprice,
+        "coup": coup,
+        "cprice" : cprice,
        
-    }
-    car.objects.filter(uid=user).update(total = total_amount)
-    return render(request,"user/checkout.html", context)
+        }
+        car.objects.filter(uid=user).update(total = total_amount)
+        return render(request,"user/checkout.html", context)
+    else:
+        context = {
+        "cart_items": cart_items,
+        "address": address,
+        "total_amount": total_amount,
+       
+        }
+        car.objects.filter(uid=user).update(total = total_amount)
+        return render(request,"user/checkout.html", context)
+    
 
 
 def add_to_cart(request):
@@ -610,13 +616,11 @@ def cash_on_delivery(request):
 
     order_id = randint(1000, 9999)
     order_lid = randint(1000,9999)
-    # order_id = str(uuid.uuid4().int)
     cart = car.objects.filter(uid=user_id).first()
     items = cl.objects.filter(ctid=cart)
     address = a.objects.filter(uid=user_id).first()
     order = o.objects.create(order_id=order_id,amount=total_amount, aid=address)
     datas = o.objects.get(order_id=order_id)
-    # date = datetime.now().date()
     pay.objects.create(oid=datas)
 
     for item in items:
@@ -630,24 +634,6 @@ def cash_on_delivery(request):
         p.objects.filter(productid = datap.productid).update(stock=stocc)
     items.delete()
     return render(request, 'user/ordersuccessfull.html')
-    # order_date=datetime.now(), 
-    # return redirect('order_success', order_id=order_id)
-   
-
-# def order_success(request, order_id):
-#     order = o.objects.get(order_id=order_id) 
-#     order_date = order.order_date.strftime("%Y-%m-%d %H:%M:%S")
-#     context = {
-
-#         'order': order,
-#         'order_date': order_date
-
-#         }
-#     return render(request, 'user/ordersuccessfull.html', context)
-
-# 'uuid' is a Python module that stands for "Universally Unique Identifier." It provides a simple way to generate unique IDs that can be used to identify objects or resources in a computer system.
-
-# A UUID is a string of characters that is guaranteed to be unique across all systems and over time. It can be used for a variety of purposes, including generating unique IDs for database records, files, or other resources.
 
 
 
@@ -673,30 +659,11 @@ def cancel_order(request):
     order_id = request.GET['olid']
     ol.objects.filter(orderlistid = order_id).update(status = 'Cancelled')
     return redirect('order_management')
-# def cancell(request):
-#     order_id = request.GET['oid']
-#     o.objects.filter(orderid = order_id).delete()
-#     return redirect('order_management')
 
 def user_order_cancel(request):
     order_id = request.GET['olid']
     ol.objects.filter(orderlistid = order_id).update(status = 'Cancelled')
     return redirect('order_history')
-# def cart_item_increment(request):
-#     pid = request.GET['product_id']
-#     user_id = u.objects.get(email = request.session['email'])
-#     user_id = request.session.get('uid')
-#     cart_details = cl.objects.filter(pid=pid)
-#     cart_details.quantity += 1
-#     cart_details.total_price = cart_details.product_id.is_offers * cart_details.cart_quantity
-#     cart_details.save()
-    
-#     cart_list = car.objects.filter(user_id_id = user_id.id ).select_related('product_id')
-#     total = int()
-#     for x in cart_list:
-#         total += x.total_price
-#     helper.total = total
-#     return JsonResponse({'quantity':cart_details.cart_quantity,'total':total})
 
 
 def cart_item_increment(request):
@@ -740,48 +707,6 @@ def cart_item_decrement(request):
         # for item in cart_list:
         #     total += item.total_price
         return JsonResponse({'quantity': cart_item.quantity,'total_price':cart_item.total_price })
-
-# Increasing the quantity of the item in the cart
-
-# def cart_item_increment(request):
-#     if request.method == 'GET':
-#         prod_id = request.GET['product_id']
-#         cart = car.objects.get(Q(product=prod_id) & Q(user=request.user))
-#         c.quantity+=1
-#         c.save()
-#         amount = 0.0
-#         vat = 0.0
-#         cart_product = [p for p in Cart.objects.all() if p.user == request.user]
-#         for p in cart_product:
-#             tempamount = (p.quantity * p.product.offer_price)
-#             amount += tempamount
-#             vat = ((amount * 5)/100)
-#             amnt=p.product.offer_price
-#             print(amount)
-#             print(vat)
-#             print(c)
-    
-#         data = {
-#             'quantity':c.quantity,
-#             'amount':amount,
-#             'totalamount':amount+vat,
-#             'amnt':amnt
-#         }
-#         return JsonResponse(data)
-#     else:
-#         return HttpResponse("")
-    
-# def order_history(request):
-#     user_id = request.session.get('uid')
-#     if not user_id:
-#         return redirect('user_login')
-#     else:
-#         orders = ol.objects.get(uid=user_id)
-#         oli = ol.objects.filter(uid=orders.uid)
-#         orr = o.objects.filter(orderid=orders.oid)
-#         return render(request, 'user/orderhistory.html',{"oli":oli,'orr':orr})
-
-
 
 
 # User Side
@@ -832,58 +757,6 @@ def update_password(request):
         else:
             messages.error(request, 'Unexpected error occured.')
             return redirect('userprofile')
-
-# def update_password(request):
-#     user_id = request.session.get('uid')
-#     if not user_id:
-#         messages.error(request, 'Login required')
-#         return redirect('user_login')
-
-#     data = u.objects.get(userid=user_id)
-#     old_password = data.password
-
-#     if request.method != 'POST':
-#         messages.error(request, 'Unexpected error occurred.')
-#         return redirect('userprofile')
-
-#     old_password_entered = request.POST.get('old_password')
-#     if old_password_entered != old_password:
-#         messages.error(request, 'Wrong password')
-#         return redirect('userprofile')
-
-#     new_password = request.POST.get('new_password')
-#     confirm_password = request.POST.get('confirm_password')
-#     if new_password != confirm_password:
-#         messages.error(request, 'Password must be same')
-#         return redirect('userprofile')
-
-#     u.objects.filter(userid=data.userid).update(password=new_password)
-#     messages.success(request, 'Password updated successfully')
-#     return redirect('userprofile')
-
-
-# def update_password(request):
-#     user_id = request.session.get('uid')
-#     if not user_id:
-#         messages.error(request,'Login required')
-#         return redirect('user_login')
-#     try:
-#         data = u.objects.get(userid=user_id)
-#         old_password = request.POST.get('old_password')
-#         new_password = request.POST.get('new_password')
-#         confirm_password = request.POST.get('confirm_password')
-#         if data.password != old_password:
-#             raise Exception("Wrong Password")
-#         if new_password != confirm_password:
-#             raise Exception("Passwords must match")
-#         data.password = new_password
-#         data.save()
-#         messages.success(request, 'Password updated successfully')
-#     except Exception as e:
-#         messages.error(request, str(e))
-#     return redirect('userprofile')
-
-
 
 def update_email(request):
     user_id = request.session.get('uid')
@@ -942,16 +815,6 @@ def email_verification(request,userid,secret):
 def update_phone(request):
 
     return redirect('userprofile')
-
-
-# def status_update(request):
-#     user_id = request.session.get('uid')
-#     stat = request.GET['st']
-#     user = u.objects.filter(userid=user_id)
-
-
-
-
 
 def status(request):
 
@@ -1048,6 +911,7 @@ def paypal(request):
             ol.objects.create(oid=order,uid = cart.uid, pid=datap, quantity=dataq, total_price=dataa,order_date = date, order_lid=order_lid)
         items.delete()
         return render(request, 'user/ordersuccessfull.html')
+        
 
 
 def coupon_management(request):
@@ -1108,11 +972,7 @@ def category_offer(request):
     else:
          messages.error(request,'Something Went Wrong')
          return redirect('category_management')
-
-
-
-
-    
+        
 def return_order(request):
     olid = request.GET['olid']
     ol.objects.filter(orderlistid=olid).update(return_order = True, status = 'Return Initiated')
@@ -1120,3 +980,18 @@ def return_order(request):
 
 
 
+# def invoice(request):
+#     order=request.GET['order']
+#     data=ord.objects.get(orderid=order)
+#     items=ordit.objects.filter(order=data).all()
+#     template = get_template('invoice.html')
+#     context = {'data':data,'items':items}
+#     html = template.render(context)
+
+#     response = HttpResponse(content_type='application/pdf')
+#     response['Content-Disposition'] = 'attachment; filename="FurrniInvoice.pdf"'
+
+#     pdf = pisa.CreatePDF(html, response)
+#     if not pdf.err:
+#         return response
+#     return HttpResponse('Error generating PDF: %s' % pdf.err, status=500)

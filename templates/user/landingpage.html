@@ -26,21 +26,10 @@
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
                         <li class="nav-item"><a class="nav-link active" aria-current="page" href="{% url 'landingpage' %}">Home</a></li>
                         <li class="nav-item"><a class="nav-link active" href="{% url 'productpage' %}">Shop</a></li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Category</a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="#!">All Products</a></li>
-                                <li><hr class="dropdown-divider" /></li>
-                                {% for i in cat %}
-                                <li><a class="dropdown-item" href="#!">{{i.cname}}</a></li>
-                                {% endfor %}
-                            </ul>
-                        </li>
                         <!-- Search bar -->
                         <form action="landingpage">
                         <div class="input-group">
                             <input type="text" class="form-control rounded" name="search" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
-                            <button type="submit" class="btn btn-outline-primary">search</button>
                           </div>
                         </form>
                         <!-- Search bar ends -->
@@ -63,14 +52,19 @@
         </nav>
         <!-- Nav bar ends -->
         <!-- Header-->
-        <header class="bg-dark py-5">
+        {% for i in ban %}
+            <header class="py-5"  style="background-image: url('{{i.image.url}}');; background-size: cover;">
+
+            
             <div class="container px-4 px-lg-5 my-5">
-                <div class="text-center text-white">
+               
+                <div  class="text-center text-black">
                     <h1 class="display-4 fw-bolder">Bookies.Com</h1>
-                    <p class="lead fw-normal text-white-50 mb-0">Never put a fullstop for your reading</p>
+                    <p class="lead fw-normal text-black-50 mb-0">Never put a fullstop for your reading</p>
                 </div>
             </div>
         </header>
+        {% endfor %}
         <!-- Header ends -->
         <!-- Section-->
         <section class="py-5">

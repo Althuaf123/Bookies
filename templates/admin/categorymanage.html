@@ -40,7 +40,7 @@
                     <i class="fa-solid fa-magnifying-glass"></i>
                     <img src="" alt="">
                     <form action="category_management">
-                        <input name="search" type="text" placeholder="Search">
+                        <input name="search" value="{{keyword}}" type="text" placeholder="Search">
                     </form>
                 </div>   
             </div>
@@ -94,8 +94,8 @@
                       </td>
                       
                       <td>
-                        <a href="{% url 'delete_category' %}?cid={{i.categoryid}}" class="btn btn-danger md-sm"><i class="fa-solid fa-trash-can"></i></a>
-                        <a href="{% url 'update_category' %}?cid={{i.categoryid}}" class="btn btn-success md-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+                        <a href="{% url 'delete_category' %}?cid={{i.categoryid}}" class="btn btn-outline-danger md-sm"><i class="fa-solid fa-trash-can"></i></a>
+                        <a href="{% url 'update_category' %}?cid={{i.categoryid}}" class="btn btn-outline-success md-sm"><i class="fa-regular fa-pen-to-square"></i></a>
                       </td>   
                     </tr> 
                     {% endfor %}
@@ -105,16 +105,16 @@
             </div>
             <br></br/>
                 <!-- Pagination -->
-                {% if orders.has_previous %}
+                {% if cat.has_previous %}
                   <a href="?page=1">&laquo; First</a>
-                  <a href="?page={{ orders.previous_page_number }}">Previous</a>
+                  <a href="?page={{ cat.previous_page_number }}">Previous</a>
                 {% endif %}
 
-                Page {{ orders.number }} of {{ orders.paginator.num_pages }}
+                Page {{ cat.number }} of {{ cat.paginator.num_pages }}
 
-                {% if orders.has_next %}
-                  <a href="?page={{ orders.next_page_number }}">Next</a>
-                  <a href="?page={{ orders.paginator.num_pages }}">Last &raquo;</a>
+                {% if cat.has_next %}
+                  <a href="?page={{ cat.next_page_number }}">Next</a>
+                  <a href="?page={{ cat.paginator.num_pages }}">Last &raquo;</a>
                 {% endif %}
           </div>   
 <!--Category Details Ends  -->

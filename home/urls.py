@@ -65,6 +65,7 @@ urlpatterns = [
     path('product_offer', views.product_offer, name='product_offer'),
     path('category_offer', views.category_offer, name='category_offer'),
     path('return_order', views.return_order, name='return_order'),
+    path ('salesreport', views.salesreport, name='salesreport')
 
     
 

@@ -89,16 +89,16 @@
             </div>
             <br></br/>
                 <!-- Pagination -->
-                {% if orders.has_previous %}
+                {% if details.has_previous %}
                   <a href="?page=1">&laquo; First</a>
-                  <a href="?page={{ orders.previous_page_number }}">Previous</a>
+                  <a href="?page={{ details.previous_page_number }}">Previous</a>
                 {% endif %}
 
-                Page {{ orders.number }} of {{ orders.paginator.num_pages }}
+                Page {{ details.number }} of {{ details.paginator.num_pages }}
 
-                {% if orders.has_next %}
-                  <a href="?page={{ orders.next_page_number }}">Next</a>
-                  <a href="?page={{ orders.paginator.num_pages }}">Last &raquo;</a>
+                {% if details.has_next %}
+                  <a href="?page={{ details.next_page_number }}">Next</a>
+                  <a href="?page={{ details.paginator.num_pages }}">Last &raquo;</a>
                 {% endif %}
           </div>   
 <!--User Details Ends  -->
