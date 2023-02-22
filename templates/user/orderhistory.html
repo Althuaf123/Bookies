@@ -65,6 +65,7 @@
         <th>Address</th>
         <th>Status</th>
         <th>Action</th>
+        <th>Invoice</th>
       </tr>
     </thead>
     <tbody>
@@ -98,6 +99,7 @@
             <a href="{% url 'user_order_cancel' %}?olid={{i.orderlistid}}" class="btn btn-danger">Cancel Order</a>
           {% endif %}
         </td>
+        <td><a href="{% url 'invoice' %}?oid={{i.oid.orderid}}"><i class="fa-solid fa-file-arrow-down"></i></a></td>
       </tr>
     {% endfor %}
     </tbody>

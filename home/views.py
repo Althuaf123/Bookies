@@ -80,7 +80,7 @@ def homepage(request):
             prod = p.objects.filter(pname__icontains = search)
             cat=c.objects.all()
             ban=banner.objects.all()
-            paginator = Paginator(prod, 5)
+            paginator = Paginator(prod, 8)
             page = request.GET.get('page')
             details = paginator.get_page(page)
             return render(request,'user/homepage.html',{'details': details, 'cat': cat, 'ban': ban, 'keyword' : search})
@@ -88,7 +88,7 @@ def homepage(request):
             prod=p.objects.all()
             cat=c.objects.all()
             ban=banner.objects.all()
-            paginator = Paginator(prod, 5)
+            paginator = Paginator(prod, 8)
             page = request.GET.get('page')
             details = paginator.get_page(page)
             return render(request,'user/homepage.html',{'details': details, 'cat': cat, 'ban': ban}) 
@@ -980,18 +980,18 @@ def return_order(request):
 
 
 
-# def invoice(request):
-#     order=request.GET['order']
-#     data=ord.objects.get(orderid=order)
-#     items=ordit.objects.filter(order=data).all()
-#     template = get_template('invoice.html')
-#     context = {'data':data,'items':items}
-#     html = template.render(context)
+def invoice(request):
+    order_id=request.GET['oid']
+    data=o.objects.get(orderid=order_id)
+    items=ol.objects.filter(oid=data).all()
+    template = get_template('user/invoice.html')
+    context = {'data':data,'items':items}
+    html = template.render(context)
 
-#     response = HttpResponse(content_type='application/pdf')
-#     response['Content-Disposition'] = 'attachment; filename="FurrniInvoice.pdf"'
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="Invoice.pdf"'
 
-#     pdf = pisa.CreatePDF(html, response)
-#     if not pdf.err:
-#         return response
-#     return HttpResponse('Error generating PDF: %s' % pdf.err, status=500)
+    pdf = pisa.CreatePDF(html, response)
+    if not pdf.err:
+        return response
+    return HttpResponse('Error generating PDF: %s' % pdf.err, status=500)
