@@ -58,8 +58,8 @@
                 {% else %}
                 <s class="text-muted">MRP. ₹{{details.price}}</s>
                 <br><p class="price">Offer Price: ₹{{details.offerprice}}</p>
-                <p><b>Publisher: </b>{{details.publisher}}</p>
                 {% endif %}
+                <p><b>Publisher: </b>{{details.publisher}}</p>
                 <a href="{% url 'add_to_cart' %}?pid={{ details.productid }}" class="btn btn-default cart">Add to Cart</a>
                 <!-- <button type="button" class="btn btn-default buy" > Buy Now</button><br> -->
                 <br><br><h5>About:</h5>

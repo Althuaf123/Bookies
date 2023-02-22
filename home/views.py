@@ -186,7 +186,7 @@ def productpage(request):
         if 'search' in request.GET:
             search=request.GET['search']
             details=p.objects.filter(pname__icontains=search)
-            return render(request,'user/productpage.html',{'details': details})
+            return render(request,'user/productpage.html',{'details': details, 'keyword': search})
             
         else:
             details=p.objects.all()
@@ -200,7 +200,26 @@ def product_details(request):
     
 def admin_home(request):
     if 'mail' in request.session:
-        
+        # data=ol.objects.all()
+        # for i in data:
+        #     print(datetime(i.order_date))
+
+        # orders_months=ol.objects.annotate(month=ExtractMonth('order_date')).values('month').annotate(count=Count('orderlistid')).values('month','count')
+        # print(orders_months)
+        # months=[]
+        # total_orders=[]
+        # for i in orders_months:
+        #     months.append(calendar.month_name[i['month']])
+        #     total_orders.append(i['count'])
+        # order=ol.objects.order_by('order_date')[:2]
+        # print(months)
+        # print(total_orders)
+        # context={
+        #     'total_orders':total_orders,
+        #     'months':months,
+        #     'order':order,
+        # }
+        # return render(request,'admin/adminhome.html',{'context':context})
         return render(request,'admin/adminhome.html')
     
     else:
@@ -262,13 +281,13 @@ def product_management(request):
         if 'search' in request.GET:
             search=request.GET['search']
             prods=p.objects.filter(pname__icontains=search)
-            paginator = Paginator(prods, 5)
+            paginator = Paginator(prods, 3)
             page = request.GET.get('page')
             details = paginator.get_page(page)
             return render(request,'admin/productmanage.html',{'details': details, 'keyword': search})
         else:
             prods=p.objects.all()
-            paginator = Paginator(prods, 5)
+            paginator = Paginator(prods, 3)
             page = request.GET.get('page')
             details = paginator.get_page(page)
             return render(request,'admin/productmanage.html',{'details': details})
@@ -492,6 +511,7 @@ def checkout(request):
         "cart_items": cart_items,
         "address": address,
         "total_amount": total_amount,
+        # "coupcode": coupcode,
         # "cprice" : cprice,
        
     }
@@ -596,7 +616,7 @@ def cash_on_delivery(request):
     address = a.objects.filter(uid=user_id).first()
     order = o.objects.create(order_id=order_id,amount=total_amount, aid=address)
     datas = o.objects.get(order_id=order_id)
-    date = datetime.now().date()
+    # date = datetime.now().date()
     pay.objects.create(oid=datas)
 
     for item in items:
@@ -604,7 +624,7 @@ def cash_on_delivery(request):
         dataq=item.quantity
         dataa=item.total_price
 
-        ol.objects.create(oid=order,uid = cart.uid, pid=datap, quantity=dataq, total_price = dataa, order_date = date, order_lid = order_lid)
+        ol.objects.create(oid=order,uid = cart.uid, pid=datap, quantity=dataq, total_price = dataa, order_lid = order_lid)
         stoc = p.objects.get(productid=item.pid.productid)
         stocc = int(stoc.stock) - int(dataq)
         p.objects.filter(productid = datap.productid).update(stock=stocc)

@@ -96,7 +96,7 @@ WSGI_APPLICATION = 'bookies.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'bookies4',
+        'NAME': 'bookies',
         'USER':'postgres',
         'PASSWORD':'123786',
         'HOST':'localhost',

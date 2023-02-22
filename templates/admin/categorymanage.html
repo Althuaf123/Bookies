@@ -50,9 +50,18 @@
             </div>
         </div>
 
-        {% for x in messages %}
-          <p class="text-success" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{x}}</p>
-        {% endfor %}
+        {% if messages %}
+            <ul class="messages">
+            {% for message in messages %}
+            <li style="list-style-type: none;" {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+            </ul>
+            <script>
+            setTimeout(function() {
+            var messages = document.querySelector(".messages");
+            messages.style.display = "none";}, 3000);
+            </script>
+          {% endif %} 
         
 
  <!-- Category Details Starts -->

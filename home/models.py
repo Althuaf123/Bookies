@@ -87,7 +87,7 @@ class order_list(models.Model):
     status = models.CharField(max_length=25, default = 'Pending')
     cancel = models.BooleanField(default=False)
     return_order = models.BooleanField(default=False)
-    order_date = models.CharField(max_length=30,default='unavailable')
+    order_date = models.DateTimeField(auto_now_add=True)
 
 
 
