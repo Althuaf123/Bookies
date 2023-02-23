@@ -1,0 +1,10 @@
+/* .btn:hover {
+	background: #ffcd05;
+	box-shadow: 0 0 5px #ffe600, 0 0 25px #ffe600, 0 0 50px #ffe600, 0 0 200px #ffe600;
+} */
+
+.btn:hover {
+	border: 2px solid #ff96ad;
+	color: #ff96ad;
+	background-color: #17181c;
+}

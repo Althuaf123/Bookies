@@ -28,7 +28,7 @@ urlpatterns = [
     path('product_management', views.product_management, name='product_management'),
     path('delete_product', views.delete_product, name='delete_product'),
     path('update_product', views.update_product, name='update_product'),
-    path('updateproduct', views.updateproduct, name='updateproduct'),
+    # path('updateproduct', views.updateproduct, name='updateproduct'),
     #path('add_product', views.add_product, name='add_product'),
     path('addproduct', views.addproduct, name='addproduct'),
     path('category_management', views.category_management, name='category_management'),
@@ -66,7 +66,9 @@ urlpatterns = [
     path('category_offer', views.category_offer, name='category_offer'),
     path('return_order', views.return_order, name='return_order'),
     path ('salesreport', views.salesreport, name='salesreport'),
-    path ('invoice', views.invoice, name='invoice')
+    path ('invoice', views.invoice, name='invoice'),
+    path('cat_sort', views.cat_sort, name='cat_sort'),
+    path('delete_address', views.delete_address,name='delete_address')
 
     
 
@@ -74,8 +76,5 @@ urlpatterns = [
     
     
     ] +static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
-# if settings.DEBUG:
-#     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
 
 

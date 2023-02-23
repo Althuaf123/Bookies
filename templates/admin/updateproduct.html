@@ -15,53 +15,52 @@
   <body>
     {% include 'admin/adminnavbar.html' %}
 
-    <h1 class="text-center  my-3">Add Product</h1>
+    <h1 class="text-center  my-3">Edit Product</h1>
     <div class="container">
         <div class="row">
             <div class="col-md-6 offset-md-3">
                 <div class="card bg-light">
                     <div class="card-body">
-                        <form action="/updateproduct" method="POST">
+                        <form action="{% url 'update_product'%}?pid={{productid}}" method="POST"  enctype="multipart/form-data">
                             {% csrf_token %}
-                            <h3>Update Product</h3>
-                            <input type="hidden" value="{{data.productid}}" name="upid" id="">
                             <div class="md-3">
                                 <label for="pname">Product Name</label>
-                                <input name="add_pname" type="text" value="{{data.pname}}" class="form-control">
+                                {{form.pname}}
                             </div>
                             <div class="md-3">
                                 <label for="price">Price</label>
-                                <input name="add_price" type="text" value="{{data.price}}" id="price" class="form-control">
+                                {{form.price}}
+
                             </div>
                             <div class="md-3">
                                 <label for="stock">Stock</label>
-                                <input name="add_stock" type="number" id="stock" value="{{data.stock}}" class="form-control">
+                                {{form.stock}}
+
                             </div>
                             <div class="md-3">
                                 <label for="author">Author</label>
-                                <input name="add_author" type="text" id="author" value="{{data.author}}" class="form-control" required>
+                                {{form.author}}
+
                             </div>
                             <div class="md-3">
                                 <label for="publisher">Publisher</label>
-                                <input name="add_publisher" type="text" id="publisher" value="{{data.publisher}}" class="form-control" required>
-                            </div>
-                            <div class="md-3">
-                                <label for="description">Description</label>
-                                <input name="add_description" type="text" id="description" value="{{data.description}}"  class="form-control" required>
+                                {{form.publisher}}
+
                             </div><br>
-                            <select class="form-select" name="add_category" aria-label="Default select example">
-                                <option selected>Select Category</option>
-                                {% for i in cat %}
-                                <option value="{{i.categoryid}}">{{i.cname}}</option>
-                                {% endfor %}
-                            </select><br><br>
+                            <div class="md-3">
+                                <label for="description">Description<label>
+                                {{form.description}}
+
+                            </div><br>
+                            {{form.cid}}
+
+                           
                             <div class="md-3">
                                 <label for="image">Images</label>
-                                <input name="add_image" type="file" id="image" value="{{data.image}}" class="form-control">
-                            </div>
-                            
+                            </div> 
+                            {{form.image}}
                             <div class="container text-center my-3">
-                                <button type="submit" class="btn btn-primary">Update Product</button>
+                                <button class="btn btn-primary">Save</button>
                             </div>
                         </form>
 

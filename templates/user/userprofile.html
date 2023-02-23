@@ -6,6 +6,7 @@
 	<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 	<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 	<link rel="stylesheet" type="text/css" href="/static/profile.css">
 </head>
 <body>
@@ -32,7 +33,6 @@
 				<div class="profile-tab-nav border-right">
 					<div class="p-4">
 						<div class="img-circle text-center mb-3">
-							<!-- <img src="img/user2.jpg" alt="Image" class="shadow"> -->
 							<lottie-player src="https://assets6.lottiefiles.com/packages/lf20_mr1kkmr2.json"  background="transparent"  speed="1"  style="width:200px; height: 100px;" hover  autoplay></lottie-player>
 						</div>
 						<h4 class="text-center">{{data.name}}</h4>
@@ -47,18 +47,11 @@
 							<i class="fa fa-key text-center mr-1"></i> 
 							Password
 						</a>
-						<a class="nav-link" id="security-tab" data-toggle="pill" href="#security" role="tab" aria-controls="security" aria-selected="false">
-							<i class="fa fa-user text-center mr-1"></i> 
-							Security
-						</a>
+						
 						<a class="nav-link" id="application-tab" data-toggle="pill" href="#address" role="tab" aria-controls="application" aria-selected="false">
 							<i class="fa fa-tv text-center mr-1"></i> 
 							Address
 						</a>
-						<!-- <a class="nav-link" id="notification-tab" data-toggle="pill" href="#notification" role="tab" aria-controls="notification" aria-selected="false">
-							<i class="fa fa-bell text-center mr-1"></i> 
-							Notification
-						</a> -->
 					</div>
 				</div>
 				
@@ -81,37 +74,27 @@
 							<div class="col-md-6">
 								<div class="form-group">
 								  	<label>Name: </label> {{data.name}}
-									
-								  	<!-- <input type="text" class="form-control" value="{{data.name}}"> -->
 								</div>
 								<div class="form-group">
 									<label>Email:</label> {{data.email}}
-									<!-- <input type="text" class="form-control" value="{{data.email}}"> -->
 							  </div>
+
 							</div>
-							<!-- <div class="col-md-6">
-								<div class="form-group">
-								  	<label>Last Name</label>
-								  	<input type="text" class="form-control" value="Acharya">
-								</div>
-							</div> -->
-							<!-- <div class="col-md-6">
-								<div class="form-group">
-								  	<label>Email:</label> {{data.email}}
-								  	<input type="text" class="form-control" value="{{data.email}}">
-								</div>
-							</div>
-							<div class="col-md-6">
-								<div class="form-group">
-								  	<label>Phone number</label>
-								  	<input type="text" class="form-control" value="{{data.phone}}">
-								</div>
-							</div> -->
 						</div>
-						<!-- <div>
+						
+							<form action="/update_email" method="POST">
+								{% csrf_token %}
+							<h3 class="mb-4">Update Email</h3>
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group">
+										  <label>Email</label>
+										  <input name="new_email" type="email" class="form-control">
+									</div>
+								</div>
+							</div>
 							<button class="btn btn-primary">Update</button>
-							<button class="btn btn-light">Cancel</button>
-						</div> -->
+							</form><br>
 					</div>
 					
 					<div class="tab-pane fade" id="password" role="tabpanel" aria-labelledby="password-tab">
@@ -140,15 +123,11 @@
 								</div>
 							</div>
 						</div>
-						<!-- <div>
-							<a href="{% url 'update_password' %}" class="btn btn-primary md-sm">Update</a>
-							<a href="" class="btn btn-light md-sm">Cancel</a>
-						</div> -->
 						<button class="btn btn-primary">Update</button>
 						</form>
 					</div>
 					
-					<div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
+					<!-- <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
 						<form action="/update_email" method="POST">
 							{% csrf_token %}
 						<h3 class="mb-4">Update Email</h3>
@@ -159,23 +138,9 @@
 								  	<input name="new_email" type="email" class="form-control">
 								</div>
 							</div>
-							<!-- <div class="col-md-6">
-								<div class="form-group">
-									<div class="form-check">
-										<input class="form-check-input" type="checkbox" value="" id="recovery">
-										<label class="form-check-label" for="recovery">
-										Recovery
-										</label>
-									</div>
-								</div>
-							</div> -->
 						</div>
-						<!-- <div>
-							<a href="" class="btn btn-primary md-sm">Update</a>
-							<a href="" class="btn btn-light md-sm">Cancel</a>
-						</div> -->
 						<button class="btn btn-primary">Update</button>
-						</form><br>
+						</form><br> -->
 						<!-- <form action="/mobile_otp" method="POST">
 							{% csrf_token %}
 						<h3 class="mb-4">Update Phone</h3>
@@ -189,7 +154,7 @@
 						</div>
 						<button class="btn btn-primary">Update</button>
 						</form> -->
-					</div>
+					<!-- </div> -->
 					<div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="application-tab">
 					
 						<div class="col-md-12 offset-md-0 my-0">
@@ -214,7 +179,7 @@
 										{{i.pincode}}
 									  </td>
 									  <td>
-										<!-- <a href="{% url 'delete_category' %}?cid={{i.categoryid}}" class="btn btn-danger md-sm">Delete</a> -->
+										<a href="{% url 'delete_address' %}?aid={{i.addressid}}" class="btn btn-outline-danger md-sm"><i class="fa-solid fa-trash-can"></i></a>
 									  </td>   
 									</tr> 
 									{% endfor %}
@@ -222,43 +187,8 @@
 								</table>
 							  </div>
 							</div>
-						  </div>   
-						<!-- <div>
-							<a href="" class="btn btn-primary md-sm">Update</a>
-							<a href="" class="btn btn-light md-sm">Cancel</a>
-						</div> -->
+						  </div>
 					</div>
-					<!-- <div class="tab-pane fade" id="notification" role="tabpanel" aria-labelledby="notification-tab">
-						<h3 class="mb-4">Notification Settings</h3>
-						<div class="form-group">
-							<div class="form-check">
-								<input class="form-check-input" type="checkbox" value="" id="notification1">
-								<label class="form-check-label" for="notification1">
-									Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum accusantium accusamus, neque cupiditate quis
-								</label>
-							</div>
-						</div>
-						<div class="form-group">
-							<div class="form-check">
-								<input class="form-check-input" type="checkbox" value="" id="notification2" >
-								<label class="form-check-label" for="notification2">
-									hic nesciunt repellat perferendis voluptatum totam porro eligendi.
-								</label>
-							</div>
-						</div>
-						<div class="form-group">
-							<div class="form-check">
-								<input class="form-check-input" type="checkbox" value="" id="notification3" >
-								<label class="form-check-label" for="notification3">
-									commodi fugiat molestiae tempora corporis. Sed dignissimos suscipit
-								</label>
-							</div>
-						</div>
-						<div>
-							<button class="btn btn-primary">Update</button>
-							<button class="btn btn-light">Cancel</button>
-						</div>
-					</div> -->
 				</div>
 			</div>
 		</div>

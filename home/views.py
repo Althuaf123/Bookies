@@ -20,7 +20,6 @@ from django.contrib import messages
 import pyotp
 from django.core.mail import send_mail
 from datetime import datetime
-import uuid
 from random import randint
 import json
 from django.http.response import JsonResponse
@@ -33,6 +32,8 @@ from io import StringIO
 
 # Create your views here.
 
+def page_not_found(request,exception):
+    return render(request, 'user/404.html',status=404)
 
 def user_login(request):
     if 'email' in request.session:
@@ -172,17 +173,50 @@ def landingpage(request):
             details=p.objects.all()
             cat=c.objects.all()
             return render(request,'user/landingpage.html',{'details': details, 'cat': cat,'ban': ban})
+        
+
 def productpage(request):
+        cat=c.objects.all()
         if 'search' in request.GET:
             search=request.GET['search']
-            details=p.objects.filter(pname__icontains=search)
-            cat=c.objects.all()
+            prod=p.objects.filter(pname__icontains=search)
+            paginator = Paginator(prod, 8)
+            page = request.GET.get('page')
+            details = paginator.get_page(page)
             return render(request,'user/productpage.html',{'details': details,'cat': cat, 'keyword': search})
+        
+        elif 'filter' in request.POST:
+            min = request.POST['min']
+            max = request.POST['max']
+            if not max:
+                prod = p.objects.filter(price__gte=min)
+                paginator = Paginator(prod, 8)
+                page = request.GET.get('page')
+                details = paginator.get_page(page)
+                return render(request, 'user/productpage.html', {'details': details, 'cat': cat, 'min': min})
+            
+            elif not min:
+                prod = p.objects.filter(price__lte=max)
+                paginator = Paginator(prod, 8)
+                page = request.GET.get('page')
+                details = paginator.get_page(page)
+                return render(request, 'user/productpage.html', {'details': details, 'cat': cat, 'max': max})
+            
+            else:
+                prod = p.objects.filter(price__gte=min, price__lte=max).all()
+                paginator = Paginator(prod, 8)
+                page = request.GET.get('page')
+                details = paginator.get_page(page)
+                return render(request, 'user/productpage.html', {'details': details, 'cat': cat, "min": min, "max": max})
             
         else:
-            details=p.objects.all()
+            prod=p.objects.all()
             cat=c.objects.all()
+            paginator = Paginator(prod, 8)
+            page = request.GET.get('page')
+            details = paginator.get_page(page)
             return render(request,'user/productpage.html',{'details': details, 'cat': cat})
+       
         
 
 def product_details(request):
@@ -347,31 +381,27 @@ def update_product(request):
         pid=request.GET["pid"]
         data=p.objects.get(productid=pid)
         cat=c.objects.all()
-        return render(request,"admin/updateproduct.html",{'data':data,'cat':cat})
+        if request.method == 'POST':
+            product_form = ProductForm(request.POST, request.FILES, instance = data)
+            if product_form.is_valid():
+                product_form.save()
+                return redirect('product_management')
+            else:
+                messages.error(request, 'Something Went Wrong')
+                return redirect('product_management')
+               
+        else:
+            product_form = ProductForm(instance = data)
+            return render(request, 'admin/updateproduct.html',{'form': product_form, 'productid': pid})
+
     else:
         return redirect('admin_login')
-    
-def updateproduct(request):
-
-    upid=request.POST['upid']
-    add_pname=request.POST["add_pname"]
-    add_price=request.POST["add_price"]
-    add_stock=request.POST["add_stock"]
-    add_author=request.POST["add_author"]
-    add_publisher=request.POST["add_publisher"]
-    add_description=request.POST["add_description"]
-    add_image=request.POST.FILES['add_image']
-    p.objects.filter(productid=upid).update(pname=add_pname,price=add_price,stock=add_stock,author=add_author,publisher=add_publisher,description=add_description,add_image=add_image)
-    
-    return redirect('product_management')
     
 def addproduct(request):
     product_form = ProductForm()
     if request.method == 'POST':
         product_form = ProductForm(request.POST or None, request.FILES )
-        print(product_form.errors)
         main_image=request.POST.get('image')
-        print(main_image)
         if product_form.is_valid():
             name = product_form.cleaned_data['pname']
             category = product_form.cleaned_data['cid']
@@ -866,8 +896,13 @@ def mobile_otp(request):
 
 
 def banner_management(request):
-    ban = banner.objects.all()
-    return render(request,'admin/bannermanagement.html',{'ban':ban})
+    if 'search' in request.GET:
+            search = request.GET['search']
+            ban = banner.objects.filter(name__contains=search)
+            return render(request,'admin/bannermanagement.html',{'ban': ban, 'keyword': search})
+    else:
+        ban = banner.objects.all()
+        return render(request,'admin/bannermanagement.html',{'ban':ban})
 
 
 
@@ -981,6 +1016,7 @@ def return_order(request):
 
 
 def invoice(request):
+
     order_id=request.GET['oid']
     data=o.objects.get(orderid=order_id)
     items=ol.objects.filter(oid=data).all()
@@ -995,3 +1031,18 @@ def invoice(request):
     if not pdf.err:
         return response
     return HttpResponse('Error generating PDF: %s' % pdf.err, status=500)
+
+def cat_sort(request):
+        
+        cat = c.objects.all()
+        cat_id = request.GET['cat_id']
+        pro = p.objects.filter(cid=cat_id).all()
+        return render(request, 'user/category.html', {'cat': cat, 'pro': pro})
+
+def delete_address(request):
+    aid = request.GET['aid']
+    a.objects.delete(address = aid)
+    messages.warning(request,'Address deleted')
+    return render(request, 'user/userprofile.html')
+
+
