@@ -86,18 +86,20 @@
           </div>
           <div class="col-md-8 order-md-1">
             <h4 class="mb-3">Add Address</h4>
-            <form  action="/add_address" method="POST" class="needs-validation" novalidate>
+            <form  action="/add_address" method="POST" class="needs-validation">
                 {% csrf_token %}
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label for="firstName">House Name</label>
+                  <label for="firstName">House Name<span
+										class="text-danger">*</span></label>
                   <input type="text" class="form-control" name="add_hname" id="firstName" placeholder="" value="" required>
                   <div class="invalid-feedback">
                     Valid house name is required.
                   </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label for="lastName">House Number</label>
+                  <label for="lastName">House Number<span
+										class="text-danger">*</span></label>
                   <input type="text" class="form-control" name="add_hnum" id="lastName" placeholder="" value="" required>
                   <div class="invalid-feedback">
                     Valid house number is required.
@@ -105,15 +107,17 @@
                 </div>
               </div>
                <div class="mb-3">
-                <label for="email">Street <span class="text-muted"></span></label>
-                <input type="text" class="form-control" name="add_street" id="email" placeholder="">
+                <label for="email">Street <span class="text-muted"></span><span
+                  class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="add_street" id="email" placeholder="" required>
                 <div class="invalid-feedback">
                   Please enter a valid street.
                 </div>
               </div>
       
               <div class="mb-3">
-                <label for="address">District</label>
+                <label for="address">District<span
+                  class="text-danger">*</span></label>
                 <input type="text" class="form-control" id="address" name="add_district" placeholder="" required>
                 <div class="invalid-feedback">
                   Please enter your district.
@@ -121,11 +125,13 @@
               </div>
       
               <div class="mb-3">
-                <label for="address2">State<span class="text-muted"></span></label>
-                <input type="text" class="form-control" id="address2" name="add_state" placeholder="">
+                <label for="address2">State<span class="text-muted"></span><span
+                  class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="address2" name="add_state" placeholder="" required>
               </div>
               <div class="col-md-3 mb-3">
-                <label for="zip">Pincode</label>
+                <label for="zip">Pincode<span
+                  class="text-danger">*</span></label>
                 <input type="text" class="form-control" name="add_pincode" id="zip" placeholder="" required>
                 <div class="invalid-feedback">
                   Pincode required.
@@ -159,6 +165,7 @@
             </form>
             <h4 class="mb-3">Select Address</h4>
             <hr class="mb-4">
+            {% if address %}
             {% for x in address %}
             <div class="form-check">
                 <input class="form-check-input" value="{{x.addressid}}" type="radio" checked name="flexRadioDefault" id="flexRadioDefault1">
@@ -167,14 +174,15 @@
                 </label>
             </div>
             {% endfor %}
+            <form action="paypal" id="paypalform" name="paypalform">
             <br><br><h4 class="mb-3">Payment</h4>
             <hr class="mb-4">
-              <a href="{% url 'cash_on_delivery' %}?total_amount={{total_amount}}" class="btn btn-primary md-sm">Cash On Delivery</a><br><br>
+              <a href="{% url 'cash_on_delivery' %}?total_amount={{total_amount}}" class="btn btn-primary btn-lg btn-block">Cash On Delivery</a><br>
 
               <!-- Paypal Integration Starts Here -->
               <script src="https://www.paypal.com/sdk/js?client-id=AfKfUS1lFPTFYZiGVa372SJHu38Ts51Q93AevUjx26YKSnqMIx2YmdRNLuO49zGuvLp_fPs_OTNz1Sa-&currency=USD&disable-funding=credit"></script>
               <!-- Set up a container element for the button -->
-              <form action="paypal" id="paypalform" name="paypalform">
+              
               <div id="paypal-button-container"></form></div>
               <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>
               <script>
@@ -217,7 +225,12 @@
         
                 }).render('#paypal-button-container');
               </script>
-               <!-- Paypal  integration Ends here  -->             
+               <!-- Paypal  integration Ends here  -->   
+               {% else %}
+            <div class="p-2 p-lg-5  bg-white inline-block">
+                <h5 class="text-danger">Add Address to Proceed</h5>
+            </div>
+            {% endif %}     
           </div>
         </div>
       </div>

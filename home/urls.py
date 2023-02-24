@@ -68,7 +68,7 @@ urlpatterns = [
     path ('salesreport', views.salesreport, name='salesreport'),
     path ('invoice', views.invoice, name='invoice'),
     path('cat_sort', views.cat_sort, name='cat_sort'),
-    path('delete_address', views.delete_address,name='delete_address')
+    # path('delete_address', views.delete_address,name='delete_address')
 
     
 

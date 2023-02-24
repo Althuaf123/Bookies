@@ -28,18 +28,12 @@
       <!-- Collapsible wrapper -->
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <!-- Navbar brand -->
-        <a class="navbar-brand mt-2 px-4 mt-lg-0" href="{% url 'homepage' %}">Bookies.Com</a>
+        <a class="navbar-brand mt-2 px-4 mt-lg-0" href="{% url 'homepage' %}">Bookiess</a>
         <!-- Left links -->
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
             <a class="nav-link" href="{% url 'homepage' %}">Home</a>
           </li>
-          <!-- <li class="nav-item">
-            <a class="nav-link" href="#">Team</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Projects</a>
-          </li> -->
         </ul>
         <!-- Left links -->
       </div>
@@ -48,37 +42,17 @@
       <!-- Right elements -->
       <div class="d-flex align-items-center">
         <!-- Icon -->
-        <!-- <a class="text-reset me-3" href="#"><i class="fas fa-shopping-cart"></i></a> -->
-  
-        <!-- Notifications -->
-        <!-- <div class="dropdown">
-          <a class="text-reset me-3 dropdown-toggle hidden-arrow" href="#" id="navbarDropdownMenuLink" role="button" data-mdb-toggle="dropdown" aria-expanded="false"><i class="fas fa-bell"></i><span class="badge rounded-pill badge-notification  bg-danger">1</span></a>
-          <ul
-            class="dropdown-menu dropdown-menu-end"
-            aria-labelledby="navbarDropdownMenuLink">
-            <li>
-              <a class="dropdown-item" href="#">Some news</a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="#">Another news</a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="#">Something else here</a>
-            </li>
-          </ul>
-        </div> -->
+        
         <!-- Avatar -->
         <div class="dropdown">
           <a class="dropdown-toggle d-flex align-items-center hidden-arrow" href="#" id="navbarDropdownMenuAvatar" role="button" data-mdb-toggle="dropdown" aria-expanded="false">
-            <!-- <img src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp" class="rounded-circle" height="25" alt="Black and White Portrait of a Man" loading="lazy"/></a> -->
             <button class="btn btn-outline-dark" type="submit">
             <i class="fa-regular fa-user"></i>
             </button>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuAvatar">
-            <li><a class="dropdown-item" href="#">My profile</a></li>
+            <li><a class="dropdown-item" href="{% url 'userprofile' %}">My profile</a></li>
             <li></li><a class="dropdown-item" href="{% url 'cart' %}">Cart</a></li>
-            <li></li><a class="dropdown-item" href="#">Wishlist</a></li>
-            <li></li><a class="dropdown-item" href="#">Orders</a></li>
+            <li></li><a class="dropdown-item" href="{% url 'order_history' %}">Orders</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="{% url 'user_logout' %}">Logout</a></li>
           </ul>
@@ -140,16 +114,7 @@
 
                   <!-- Product Card Ends -->
       
-              <!-- <div class="card mb-4">
-                <div class="card-body p-4 d-flex flex-row">
-                  <div class="form-outline flex-fill">
-                    <input type="text" id="form1" class="form-control form-control-lg" />
-                    <label class="form-label" for="form1">Discound code</label>
-                  </div>
-                  <button type="button" class="btn btn-outline-warning btn-lg ms-3">Apply</button>
-                </div>
-              </div> -->
-      
+              
               <div class="card">
                 <div class="card-body">
                 <form action="/checkout">
@@ -163,7 +128,7 @@
               <div class="py-5 text-center d-flex justify-content-bet align-items-center flex-row"> 
               <lottie-player src="https://assets1.lottiefiles.com/packages/lf20_ry4iluja.json"  background="transparent"  speed="1"  style="width: 500px; height: 500px;"  loop  autoplay></lottie-player>
 
-              <!-- <lottie-player src="https://assets1.lottiefiles.com/packages/lf20_15TIGR.json"  background="transparent"  speed="1"  style="width: 300px; height: 300px;"  loop autoplay></lottie-player> -->
+            
               
                       <h2>Your Bag is Empty</h2>
                 

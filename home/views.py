@@ -1039,10 +1039,10 @@ def cat_sort(request):
         pro = p.objects.filter(cid=cat_id).all()
         return render(request, 'user/category.html', {'cat': cat, 'pro': pro})
 
-def delete_address(request):
-    aid = request.GET['aid']
-    a.objects.delete(address = aid)
-    messages.warning(request,'Address deleted')
-    return render(request, 'user/userprofile.html')
+# def delete_address(request):
+#     aid = request.GET['aid']
+#     a.objects.filter(addressid = aid).delete()
+#     messages.warning(request,'Address deleted')
+#     return render(request, 'user/userprofile.html')
 
 

@@ -13,7 +13,7 @@
 	<!-- Navbar Starts -->
 	<nav class="navbar navbar-expand-lg navbar-light bg-secondary fixed-top">
 		<div class="container px-4 px-lg-5">
-			<a class="navbar-brand" href="{% url 'homepage' %}">Bookies.com</a>
+			<a class="navbar-brand" href="{% url 'homepage' %}">Bookiess</a>
 			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 				<ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
@@ -178,9 +178,9 @@
 										{{i.state}}, 
 										{{i.pincode}}
 									  </td>
-									  <td>
+									  <!-- <td>
 										<a href="{% url 'delete_address' %}?aid={{i.addressid}}" class="btn btn-outline-danger md-sm"><i class="fa-solid fa-trash-can"></i></a>
-									  </td>   
+									  </td>    -->
 									</tr> 
 									{% endfor %}
 								  </tbody>
