@@ -86,6 +86,7 @@
                           <option value="Shipping">Shipping</option>
                           <option value="Delivered">Delivered</option>
                         </select>
+                        {% csrf_token %}
                         {% else %}
                         <select name="orderStatus" class="form-select" id="status{{forloop.counter}}" onchange="oM(this.id, '{{i.orderlistid}}')">
                           

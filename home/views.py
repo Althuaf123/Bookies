@@ -1,4 +1,4 @@
-from django.shortcuts import render
+
 
 # Create your views here.
 from django.shortcuts import render, redirect, HttpResponse
@@ -31,6 +31,8 @@ from xhtml2pdf import pisa
 from io import StringIO
 
 # Create your views here.
+
+# //--User Functions --//
 
 def page_not_found(request,exception):
     return render(request, 'user/404.html',status=404)
@@ -217,13 +219,388 @@ def productpage(request):
             details = paginator.get_page(page)
             return render(request,'user/productpage.html',{'details': details, 'cat': cat})
        
+def cat_sort(request):
         
+    cat = c.objects.all()
+    cat_id = request.GET['cat_id']
+    pro = p.objects.filter(cid=cat_id).all()
+    return render(request, 'user/category.html', {'cat': cat, 'pro': pro})       
 
 def product_details(request):
     pid=request.GET["pid"]
     details=p.objects.get(productid=pid)
     print(details.image)
     return render(request,"user/productdetails.html",{'details':details})
+
+def checkout(request):
+    usid = request.session.get("uid")
+    if not usid:
+        return redirect("user_login")
+
+    user = u.objects.filter(userid=usid).first()
+    if not user:
+        return redirect("user_signup")
+
+    cart = car.objects.filter(uid=user).first()
+    if not cart:
+        return redirect("homepage")
+    
+    cart_items = cl.objects.filter(ctid=cart)
+    address = a.objects.filter(uid=user)
+    total_amount = 0
+    for item in cart_items:
+        product = item.pid
+        quantity = item.quantity
+        total_amount += product.price * quantity
+
+    if 'coupcode' in request.GET:
+        coupcode = request.GET['coupcode']
+        comp = coupon.objects.get(coupname = coupcode)
+        coup = None
+        if comp:
+            coup = coupcode
+            cprice = int(comp.price)
+            total_amount -= cprice
+            
+        else:
+            messages.warning(request, 'Invalid Coupon Code')
+            return render(request,"user/checkout.html")
+        context = {
+        "cart_items": cart_items,
+        "address": address,
+        "total_amount": total_amount,
+        "coup": coup,
+        "cprice" : cprice,
+       
+        }
+        car.objects.filter(uid=user).update(total = total_amount)
+        return render(request,"user/checkout.html", context)
+    else:
+        context = {
+        "cart_items": cart_items,
+        "address": address,
+        "total_amount": total_amount,
+       
+        }
+        car.objects.filter(uid=user).update(total = total_amount)
+        return render(request,"user/checkout.html", context)
+    
+
+
+def add_to_cart(request):
+    uid = request.session.get("uid")
+    if not uid:
+        return redirect("login")
+
+    user = u.objects.filter(userid=uid).first()
+    if not user:
+        return redirect("login")
+
+    pid = request.GET.get("pid")
+    product = p.objects.filter(productid=pid).first()
+    if not product:
+        return redirect("home")
+ 
+    cart, created = car.objects.get_or_create(uid=user)
+    cart_item, created = cl.objects.get_or_create(pid=product, ctid=cart)
+    if not created:
+        cart_item.quantity += 1
+        cart_item.save()
+    else:
+        cart_item.quantity = 1
+        cart_item.save()
+
+    return redirect("cart")
+
+def cart(request):
+    uid = request.session.get("uid")
+    if not uid:
+        return redirect("user_login")
+
+    user = u.objects.filter(userid=uid).first()
+    if not user:
+        return redirect("user_signup")
+
+    cart = car.objects.filter(uid=user).first()
+    if not cart:
+        return redirect("homepage")
+
+    cart_items = cl.objects.filter(ctid=cart)
+    context = {
+        "cart_items": cart_items,
+    }
+    return render(request, "user/cart.html", context)
+
+
+def delete_cart_items(request):
+    clid=request.GET["clid"]
+    cl.objects.filter(cartlistid=clid).delete()
+    return redirect("cart")
+
+
+def add_address(request):
+    user_id = request.session.get("uid")
+    if not user_id:
+        return redirect("user_login")
+
+    user = u.objects.filter(userid=user_id).first()
+    if not user:
+        return redirect("user_login")
+    
+    if request.method == 'POST':
+        hname = request.POST.get("add_hname", "")
+        hnum = request.POST.get("add_hnum", "")
+        street = request.POST.get("add_street", "")
+        district = request.POST.get("add_district", "")
+        state = request.POST.get("add_state", "")
+        pincode = request.POST.get("add_pincode", "")
+
+        if not all([hname, hnum, street, district, state, pincode]):
+            messages.error(request, "All fields are required")
+            return redirect("checkout")
+
+        a.objects.create(hname=hname, hno=hnum, street=street,district=district, state=state,pincode=pincode, uid=user)
+        messages.success(request, "Address added successfully")
+        return redirect("checkout")
+    else:
+        return render(request, "user/checkout.html")
+
+
+def cash_on_delivery(request):
+    user_id = request.session.get('uid')
+    # data=u.objects.get(userid=user_id)
+    total_amount = request.GET['total_amount']
+    if not user_id:
+        return redirect('user_login')
+
+    order_id = randint(1000, 9999)
+    order_lid = randint(1000,9999)
+    cart = car.objects.filter(uid=user_id).first()
+    items = cl.objects.filter(ctid=cart)
+    address = a.objects.filter(uid=user_id).first()
+    order = o.objects.create(order_id=order_id,amount=total_amount, aid=address)
+    datas = o.objects.get(order_id=order_id)
+    pay.objects.create(oid=datas)
+
+    for item in items:
+        datap=item.pid
+        dataq=item.quantity
+        dataa=item.total_price
+
+        ol.objects.create(oid=order,uid = cart.uid, pid=datap, quantity=dataq, total_price = dataa, order_lid = order_lid)
+        stoc = p.objects.get(productid=item.pid.productid)
+        stocc = int(stoc.stock) - int(dataq)
+        p.objects.filter(productid = datap.productid).update(stock=stocc)
+    items.delete()
+    return render(request, 'user/ordersuccessfull.html')
+
+def cancel_order(request):
+    order_id = request.GET['olid']
+    ol.objects.filter(orderlistid = order_id).update(status = 'Cancelled')
+    return redirect('order_management')
+
+def user_order_cancel(request):
+    order_id = request.GET['olid']
+    ol.objects.filter(orderlistid = order_id).update(status = 'Cancelled')
+    return redirect('order_history')
+
+
+def cart_item_increment(request):
+
+    if request.method == 'POST':
+        pid = request.POST['product_id']
+
+    user = u.objects.get(email=request.session['email'])
+    cart = car.objects.get(uid = user.userid)
+    cart_item = cl.objects.get(Q(pid=pid) & Q(ctid=cart.cartid))
+    product = p.objects.get(productid=pid)
+    if int(product.stock) - int(cart_item.quantity) > 0:
+        cart_item.quantity += 1
+    cart_item.total_price = product.price * cart_item.quantity
+    cart_item.save()
+    
+    # cart_list = cl.objects.filter(ctid=cart.cartid)
+    # total = 0
+    # for item in cart_list:
+    #     total += item.total_price
+    return JsonResponse({'quantity': cart_item.quantity,'total_price':cart_item.total_price })
+
+
+def cart_item_decrement(request):
+
+    if request.method == 'POST':
+        pid = request.POST['product_id']
+        user = u.objects.get(email=request.session['email'])
+        cart = car.objects.get(uid = user.userid)
+        cart_item = cl.objects.get(Q(pid=pid) & Q(ctid=cart.cartid))
+        if cart_item.quantity > 1:
+            cart_item.quantity -= 1
+        else:
+            pass
+        product = p.objects.get(productid=pid)
+        cart_item.total_price = product.price * cart_item.quantity
+        cart_item.save()
+        
+        # cart_list = cl.objects.filter(ctid=cart.cartid)
+        # total = 0
+        # for item in cart_list:
+        #     total += item.total_price
+        return JsonResponse({'quantity': cart_item.quantity,'total_price':cart_item.total_price })
+
+
+# User Side
+def order_history(request):
+    user_id = request.session.get('uid')
+    if not user_id:
+        return redirect('user_login')
+    else:
+        ord = ol.objects.filter(uid=user_id)
+        orr = []
+        for order in ord:
+            orr.append(o.objects.get(orderid=order.oid.orderid))
+        paginator = Paginator(ord, 6)
+        page = request.GET.get('page')
+        orders = paginator.get_page(page)
+
+        return render(request, 'user/orderhistory.html',{"orders":orders,'orr':order})
+
+def update_password(request):
+    user_id = request.session.get('uid')
+    if not user_id:
+        messages.error(request,'Login required')
+        return redirect('user_login')
+    else:
+        data=u.objects.get(userid=user_id)
+        op=data.password
+        if request.method == 'POST':
+            old_password=request.POST['old_password']
+            new_password=request.POST['new_password']
+            confirm_password=request.POST['confirm_password']
+            if old_password == op:
+                if new_password == confirm_password:    
+                    u.objects.filter(userid=data.userid).update(password=new_password)
+                    messages.success(request, 'Password Updated Successfully.')
+                    return redirect('userprofile')
+                else:
+                    messages.error(request, 'Passsowrd must be same')
+                    return redirect('userprofile')
+            else:
+                messages.error(request, 'Wrong Password')
+                return redirect('userprofile')
+        else:
+            messages.error(request, 'Unexpected error occured.')
+            return redirect('userprofile')
+
+def update_email(request):
+    user_id = request.session.get('uid')
+    if not user_id:
+        messages.error(request,'Login required')
+        return redirect('user_login')
+    else:
+        data=u.objects.get(userid=user_id)
+        if request.method == 'POST':
+            new_email=request.POST['new_email']
+            u.objects.filter(userid=data.userid).update(tempmail=new_email)
+            secret=pyotp.random_base32()
+            totp=pyotp.TOTP(secret,interval=300)
+            otp=totp.now()
+            recipient_list=data.tempmail
+            send_mail('Bookies','Your one time password for bookies is '+str(otp)+'.OTP will expire within 5 minutes','bookiess.com@gmail.com', [recipient_list],fail_silently=True)
+            response= redirect(f'email_verification/{data.userid}/{secret}')
+            response.set_cookie("ca_otp_enter",True,max_age=500)
+            return response
+            # messages.success(request, 'E-mail Updated Successfully')
+            # return redirect('userprofile')
+        else:
+            messages.error(request, 'Unexpected error occured.')
+            return redirect('userprofile')
+        
+def email_verification(request,userid,secret):
+    if request.POST:
+        totp=pyotp.TOTP(secret,interval=300)
+        try:
+            user=u.objects.get(userid=userid)
+        except u.DoesNotExist:
+            messages.error(request,'Login Required')
+            return redirect('user_login')
+        code=request.POST['1']+request.POST['2']+request.POST['3']+request.POST['4']+request.POST['5']+request.POST['6']
+        if request.COOKIES.get('ca_otp_enter')!=None:
+            if (totp.verify(code)):
+                if (user.tempmail):
+                    user.email = user.tempmail
+                    user.save()
+                    response=redirect('userprofile')
+                    response.set_cookie('verified',True)
+                    messages.success(request,'Email Updation Successfull.')
+                    return response
+                else:
+                    messages.error(request,'wrong otp')
+                    return render(request,'user/otp.html')
+            else:
+                messages.error(request,'something went wrong')
+                return render(request,'user/otp.html')
+        else:
+            messages.error(request,'OTP expired')
+            return render(request,'user/otp.html')
+    else:
+        return render(request,'user/otp.html')
+
+def paypal(request):
+    user_id = request.session.get('uid')
+    data = u.objects.get(userid = user_id)
+    cart = car.objects.get(uid = data.userid)
+
+
+    if not user_id:
+        return redirect('user_login')
+    else:
+        order_id = randint(1000,9999)
+        order_lid = randint(1000,9999)
+        items = cl.objects.filter(ctid = cart.cartid)
+        address = a.objects.filter(uid = user_id).first()
+        order = o.objects.create(order_id = order_id, amount=cart.total, aid = address)
+        datas = o.objects.get(order_id=order_id)
+        date = datetime.now().date()
+        pay.objects.create(oid=datas, mode = 'PayPal')
+        for item in items:
+            datap=item.pid
+            dataq=item.quantity
+            dataa=item.total_price
+            ol.objects.create(oid=order,uid = cart.uid, pid=datap, quantity=dataq, total_price=dataa,order_date = date, order_lid=order_lid)
+        items.delete()
+        return render(request, 'user/ordersuccessfull.html')
+
+def return_order(request):
+    olid = request.GET['olid']
+    ol.objects.filter(orderlistid=olid).update(return_order = True, status = 'Return Initiated')
+    return redirect('order_history')
+
+
+
+def invoice(request):
+
+    order_id=request.GET['oid']
+    data=o.objects.get(orderid=order_id)
+    items=ol.objects.filter(oid=data).all()
+    template = get_template('user/invoice.html')
+    context = {'data':data,'items':items}
+    html = template.render(context)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="Invoice.pdf"'
+
+    pdf = pisa.CreatePDF(html, response)
+    if not pdf.err:
+        return response
+    return HttpResponse('Error generating PDF: %s' % pdf.err, status=500)
+
+# def delete_address(request):
+#     aid = request.GET['aid']
+#     a.objects.filter(addressid = aid).delete()
+#     messages.warning(request,'Address deleted')
+#     return render(request, 'user/userprofile.html')
+
+# //-- Admin Functions --//
     
 def admin_home(request):
     if 'mail' in request.session:
@@ -424,6 +801,7 @@ def addproduct(request):
 
     return render(request,"admin/addproduct.html", context)
 
+@never_cache
 def category_management(request):
     if 'mail' in request.session:
         if 'search' in request.GET:
@@ -490,7 +868,7 @@ def updatecategory(request):
     messages.success(request, 'Updated!!!')
     return redirect('category_management')
 
-
+@never_cache
 def admin_logout(request):
     if 'mail' in request.session:
         del request.session['mail']
@@ -498,175 +876,6 @@ def admin_logout(request):
     else:
         return redirect('admin_login')
     
-
-
-def checkout(request):
-    usid = request.session.get("uid")
-    if not usid:
-        return redirect("user_login")
-
-    user = u.objects.filter(userid=usid).first()
-    if not user:
-        return redirect("user_signup")
-
-    cart = car.objects.filter(uid=user).first()
-    if not cart:
-        return redirect("homepage")
-    
-    cart_items = cl.objects.filter(ctid=cart)
-    address = a.objects.filter(uid=user)
-    total_amount = 0
-    for item in cart_items:
-        product = item.pid
-        quantity = item.quantity
-        total_amount += product.price * quantity
-
-    if 'coupcode' in request.GET:
-        coupcode = request.GET['coupcode']
-        comp = coupon.objects.get(coupname = coupcode)
-        coup = None
-        if comp:
-            coup = coupcode
-            cprice = int(comp.price)
-            total_amount -= cprice
-            
-        else:
-            messages.warning(request, 'Invalid Coupon Code')
-            return render(request,"user/checkout.html")
-        context = {
-        "cart_items": cart_items,
-        "address": address,
-        "total_amount": total_amount,
-        "coup": coup,
-        "cprice" : cprice,
-       
-        }
-        car.objects.filter(uid=user).update(total = total_amount)
-        return render(request,"user/checkout.html", context)
-    else:
-        context = {
-        "cart_items": cart_items,
-        "address": address,
-        "total_amount": total_amount,
-       
-        }
-        car.objects.filter(uid=user).update(total = total_amount)
-        return render(request,"user/checkout.html", context)
-    
-
-
-def add_to_cart(request):
-    uid = request.session.get("uid")
-    if not uid:
-        return redirect("login")
-
-    user = u.objects.filter(userid=uid).first()
-    if not user:
-        return redirect("login")
-
-    pid = request.GET.get("pid")
-    product = p.objects.filter(productid=pid).first()
-    if not product:
-        return redirect("home")
- 
-    cart, created = car.objects.get_or_create(uid=user)
-    cart_item, created = cl.objects.get_or_create(pid=product, ctid=cart)
-    if not created:
-        cart_item.quantity += 1
-        cart_item.save()
-    else:
-        cart_item.quantity = 1
-        cart_item.save()
-
-    return redirect("cart")
-
-def cart(request):
-    uid = request.session.get("uid")
-    if not uid:
-        return redirect("user_login")
-
-    user = u.objects.filter(userid=uid).first()
-    if not user:
-        return redirect("user_signup")
-
-    cart = car.objects.filter(uid=user).first()
-    if not cart:
-        return redirect("homepage")
-
-    cart_items = cl.objects.filter(ctid=cart)
-    context = {
-        "cart_items": cart_items,
-    }
-    return render(request, "user/cart.html", context)
-
-
-def delete_cart_items(request):
-    clid=request.GET["clid"]
-    cl.objects.filter(cartlistid=clid).delete()
-    return redirect("cart")
-
-
-def add_address(request):
-    user_id = request.session.get("uid")
-    if not user_id:
-        return redirect("user_login")
-
-    user = u.objects.filter(userid=user_id).first()
-    if not user:
-        return redirect("user_login")
-    
-    if request.method == 'POST':
-        hname = request.POST.get("add_hname", "")
-        hnum = request.POST.get("add_hnum", "")
-        street = request.POST.get("add_street", "")
-        district = request.POST.get("add_district", "")
-        state = request.POST.get("add_state", "")
-        pincode = request.POST.get("add_pincode", "")
-
-        if not all([hname, hnum, street, district, state, pincode]):
-            messages.error(request, "All fields are required")
-            return redirect("checkout")
-
-        a.objects.create(hname=hname, hno=hnum, street=street,district=district, state=state,pincode=pincode, uid=user)
-        messages.success(request, "Address added successfully")
-        return redirect("checkout")
-    else:
-        return render(request, "user/checkout.html")
-
-
-
-
-
-def cash_on_delivery(request):
-    user_id = request.session.get('uid')
-    # data=u.objects.get(userid=user_id)
-    total_amount = request.GET['total_amount']
-    if not user_id:
-        return redirect('user_login')
-
-    order_id = randint(1000, 9999)
-    order_lid = randint(1000,9999)
-    cart = car.objects.filter(uid=user_id).first()
-    items = cl.objects.filter(ctid=cart)
-    address = a.objects.filter(uid=user_id).first()
-    order = o.objects.create(order_id=order_id,amount=total_amount, aid=address)
-    datas = o.objects.get(order_id=order_id)
-    pay.objects.create(oid=datas)
-
-    for item in items:
-        datap=item.pid
-        dataq=item.quantity
-        dataa=item.total_price
-
-        ol.objects.create(oid=order,uid = cart.uid, pid=datap, quantity=dataq, total_price = dataa, order_lid = order_lid)
-        stoc = p.objects.get(productid=item.pid.productid)
-        stocc = int(stoc.stock) - int(dataq)
-        p.objects.filter(productid = datap.productid).update(stock=stocc)
-    items.delete()
-    return render(request, 'user/ordersuccessfull.html')
-
-
-
 def order_management(request):
     if 'mail' in request.session:
         if 'search' in request.GET:
@@ -685,75 +894,7 @@ def order_management(request):
     else:
         return redirect('admin_login')
 
-def cancel_order(request):
-    order_id = request.GET['olid']
-    ol.objects.filter(orderlistid = order_id).update(status = 'Cancelled')
-    return redirect('order_management')
 
-def user_order_cancel(request):
-    order_id = request.GET['olid']
-    ol.objects.filter(orderlistid = order_id).update(status = 'Cancelled')
-    return redirect('order_history')
-
-
-def cart_item_increment(request):
-
-    if request.method == 'POST':
-        pid = request.POST['product_id']
-
-    user = u.objects.get(email=request.session['email'])
-    cart = car.objects.get(uid = user.userid)
-    cart_item = cl.objects.get(Q(pid=pid) & Q(ctid=cart.cartid))
-    product = p.objects.get(productid=pid)
-    if int(product.stock) - int(cart_item.quantity) > 0:
-        cart_item.quantity += 1
-    cart_item.total_price = product.price * cart_item.quantity
-    cart_item.save()
-    
-    # cart_list = cl.objects.filter(ctid=cart.cartid)
-    # total = 0
-    # for item in cart_list:
-    #     total += item.total_price
-    return JsonResponse({'quantity': cart_item.quantity,'total_price':cart_item.total_price })
-
-
-def cart_item_decrement(request):
-
-    if request.method == 'POST':
-        pid = request.POST['product_id']
-        user = u.objects.get(email=request.session['email'])
-        cart = car.objects.get(uid = user.userid)
-        cart_item = cl.objects.get(Q(pid=pid) & Q(ctid=cart.cartid))
-        if cart_item.quantity > 1:
-            cart_item.quantity -= 1
-        else:
-            pass
-        product = p.objects.get(productid=pid)
-        cart_item.total_price = product.price * cart_item.quantity
-        cart_item.save()
-        
-        # cart_list = cl.objects.filter(ctid=cart.cartid)
-        # total = 0
-        # for item in cart_list:
-        #     total += item.total_price
-        return JsonResponse({'quantity': cart_item.quantity,'total_price':cart_item.total_price })
-
-
-# User Side
-def order_history(request):
-    user_id = request.session.get('uid')
-    if not user_id:
-        return redirect('user_login')
-    else:
-        ord = ol.objects.filter(uid=user_id)
-        orr = []
-        for order in ord:
-            orr.append(o.objects.get(orderid=order.oid.orderid))
-        paginator = Paginator(ord, 6)
-        page = request.GET.get('page')
-        orders = paginator.get_page(page)
-
-        return render(request, 'user/orderhistory.html',{"orders":orders,'orr':order})
 # Admin Side
 def order_details(request):
     orid = request.GET['orid']
@@ -761,136 +902,19 @@ def order_details(request):
     o_li = ol.objects.filter(oid=orid)
     return render(request,'admin/orderview.html', {"o_li":o_li , 'orr':orr})
 
-def update_password(request):
-    user_id = request.session.get('uid')
-    if not user_id:
-        messages.error(request,'Login required')
-        return redirect('user_login')
-    else:
-        data=u.objects.get(userid=user_id)
-        op=data.password
-        if request.method == 'POST':
-            old_password=request.POST['old_password']
-            new_password=request.POST['new_password']
-            confirm_password=request.POST['confirm_password']
-            if old_password == op:
-                if new_password == confirm_password:    
-                    u.objects.filter(userid=data.userid).update(password=new_password)
-                    messages.success(request, 'Password Updated Successfully.')
-                    return redirect('userprofile')
-                else:
-                    messages.error(request, 'Passsowrd must be same')
-                    return redirect('userprofile')
-            else:
-                messages.error(request, 'Wrong Password')
-                return redirect('userprofile')
-        else:
-            messages.error(request, 'Unexpected error occured.')
-            return redirect('userprofile')
 
-def update_email(request):
-    user_id = request.session.get('uid')
-    if not user_id:
-        messages.error(request,'Login required')
-        return redirect('user_login')
-    else:
-        data=u.objects.get(userid=user_id)
-        if request.method == 'POST':
-            new_email=request.POST['new_email']
-            u.objects.filter(userid=data.userid).update(tempmail=new_email)
-            secret=pyotp.random_base32()
-            totp=pyotp.TOTP(secret,interval=300)
-            otp=totp.now()
-            recipient_list=data.tempmail
-            send_mail('Bookies','Your one time password for bookies is '+str(otp)+'.OTP will expire within 5 minutes','bookiess.com@gmail.com', [recipient_list],fail_silently=True)
-            response= redirect(f'email_verification/{data.userid}/{secret}')
-            response.set_cookie("ca_otp_enter",True,max_age=500)
-            return response
-            # messages.success(request, 'E-mail Updated Successfully')
-            # return redirect('userprofile')
-        else:
-            messages.error(request, 'Unexpected error occured.')
-            return redirect('userprofile')
-        
-def email_verification(request,userid,secret):
-    if request.POST:
-        totp=pyotp.TOTP(secret,interval=300)
-        try:
-            user=u.objects.get(userid=userid)
-        except u.DoesNotExist:
-            messages.error(request,'Login Required')
-            return redirect('user_login')
-        code=request.POST['1']+request.POST['2']+request.POST['3']+request.POST['4']+request.POST['5']+request.POST['6']
-        if request.COOKIES.get('ca_otp_enter')!=None:
-            if (totp.verify(code)):
-                if (user.tempmail):
-                    user.email = user.tempmail
-                    user.save()
-                    response=redirect('userprofile')
-                    response.set_cookie('verified',True)
-                    messages.success(request,'Email Updation Successfull.')
-                    return response
-                else:
-                    messages.error(request,'wrong otp')
-                    return render(request,'user/otp.html')
-            else:
-                messages.error(request,'something went wrong')
-                return render(request,'user/otp.html')
-        else:
-            messages.error(request,'OTP expired')
-            return render(request,'user/otp.html')
-    else:
-        return render(request,'user/otp.html')
 
-def update_phone(request):
-
-    return redirect('userprofile')
 
 def status(request):
 
     if request.method == 'POST':
         request_body = request.body.decode('utf-8')
         data = json.loads(request_body)
-        orrid = data['orderid']
+        orrid = data['orderlistid']
         sta =  data['status']
         ol.objects.filter(orderlistid = orrid).update(status = sta )
         dat = ol.objects.get(orderlistid = orrid)
         return JsonResponse({'status': dat.status})
-
-
-
-def mobile_verify(request,message_2,number):
-    user_id = request.session.get('uid')
-    user = u.objects.get(userid=user_id)
-    if request.POST:
-        otp_ent = (request.POST['1']+request.POST['2']+request.POST['3']+request.POST['4']+request.POST['5']+request.POST['6'])
-        if otp_ent == message_2:
-            u.objects.filter(userid=user_id).update(phone=number)
-            messages.success(request,'Phone Number updated!')
-            return redirect('user_profile')
-        else:
-            messages.error(request,'Incorrect OTP')
-            return render(request,'user/otp.html')
-        
-
-def mobile_otp(request):
-        if request.method == 'POST':
-        
-            otp= random.randint(100000, 999999)
-
-            url = 'https://www.fast2sms.com/dev/bulkV2'
-            message = ' Welcome to Bookies.Com, your one time password is: '
-            message_2 = otp
-            number = '7907099495'
-            payload = f'sender_id=TXTIND&message={message,message_2}&route=v3&language=english&numbers={number}'
-            headers = {
-                'authorization' : "fcBw3gtlqKo49mx8QADZ0RC1jzP2T6rIeiFkYLaHvbWOnpy7shJwMcsKORGLkoUI26TYyZFPp8Ej9bSA",
-                'Content-Type' : "application/x-www-form-urlencoded"
-            }
-            response= redirect(f'mobile_verify// {url}/{message_2}/{headers}/{number}')
-            response= redirect(f'mobile_verify/{number}/{message_2}')
-            response = requests.request("POST",url=url, data=payload, headers=headers)
-            return response
 
 
 
@@ -921,33 +945,6 @@ def delete_banner(request):
     print(banner_id)
     banner.objects.filter(bannerid=banner_id).delete()
     return redirect ('banner_management')
-
-def paypal(request):
-    user_id = request.session.get('uid')
-    data = u.objects.get(userid = user_id)
-    cart = car.objects.get(uid = data.userid)
-
-
-    if not user_id:
-        return redirect('user_login')
-    else:
-        order_id = randint(1000,9999)
-        order_lid = randint(1000,9999)
-        items = cl.objects.filter(ctid = cart.cartid)
-        address = a.objects.filter(uid = user_id).first()
-        order = o.objects.create(order_id = order_id, amount=cart.total, aid = address)
-        datas = o.objects.get(order_id=order_id)
-        date = datetime.now().date()
-        pay.objects.create(oid=datas, mode = 'PayPal')
-        for item in items:
-            datap=item.pid
-            dataq=item.quantity
-            dataa=item.total_price
-            ol.objects.create(oid=order,uid = cart.uid, pid=datap, quantity=dataq, total_price=dataa,order_date = date, order_lid=order_lid)
-        items.delete()
-        return render(request, 'user/ordersuccessfull.html')
-        
-
 
 def coupon_management(request):
     if 'mail' in request.session:
@@ -1007,42 +1004,9 @@ def category_offer(request):
     else:
          messages.error(request,'Something Went Wrong')
          return redirect('category_management')
-        
-def return_order(request):
-    olid = request.GET['olid']
-    ol.objects.filter(orderlistid=olid).update(return_order = True, status = 'Return Initiated')
-    return redirect('order_history')
 
 
 
-def invoice(request):
 
-    order_id=request.GET['oid']
-    data=o.objects.get(orderid=order_id)
-    items=ol.objects.filter(oid=data).all()
-    template = get_template('user/invoice.html')
-    context = {'data':data,'items':items}
-    html = template.render(context)
-
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="Invoice.pdf"'
-
-    pdf = pisa.CreatePDF(html, response)
-    if not pdf.err:
-        return response
-    return HttpResponse('Error generating PDF: %s' % pdf.err, status=500)
-
-def cat_sort(request):
-        
-        cat = c.objects.all()
-        cat_id = request.GET['cat_id']
-        pro = p.objects.filter(cid=cat_id).all()
-        return render(request, 'user/category.html', {'cat': cat, 'pro': pro})
-
-# def delete_address(request):
-#     aid = request.GET['aid']
-#     a.objects.filter(addressid = aid).delete()
-#     messages.warning(request,'Address deleted')
-#     return render(request, 'user/userprofile.html')
 
 
