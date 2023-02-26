@@ -80,8 +80,9 @@ urlpatterns = [
     path('delete_coupon', views.delete_coupon, name='delete_coupon'),
 
     path('product_offer', views.product_offer, name='product_offer'),
-    path('category_offer', views.category_offer, name='category_offer')
-        
+    path('category_offer', views.category_offer, name='category_offer'),
+    path('adsignup',views.adsignup, name='adsignup'),
+    path('adds', views.adds,name='adds')
     
 
         

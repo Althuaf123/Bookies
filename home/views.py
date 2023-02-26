@@ -620,6 +620,18 @@ def admin_home(request):
     
     else:
         return redirect('admin_login')
+def adds(request):
+    return render(request,"admin/ads.html")
+    
+def adsignup(request):
+
+    if request.method == 'POST':
+        
+        mail=request.POST['email']
+        password=request.POST['password']
+        admi=admin.objects.create(mail=mail,password=password)
+        admi.save()
+        return render(request,"admin/adminlogin.html")
     
 def salesreport(request):
     if request.POST:
