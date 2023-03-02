@@ -33,10 +33,11 @@ from io import StringIO
 # Create your views here.
 
 # //--User Functions --//
-
+@never_cache
 def page_not_found(request,exception):
     return render(request, 'user/404.html',status=404)
 
+@never_cache
 def user_login(request):
     if 'email' in request.session:
         return render(request, 'user/homepage.html')
@@ -155,12 +156,13 @@ def otp_verification(request,userid,secret):
     else:
         return render(request,'user/otp.html')
     
-    
+@never_cache   
 def user_logout(request):
     if 'email' in request.session:
         del request.session['email']
     return redirect('landingpage')
 
+@never_cache
 def landingpage(request):
     if 'email' in request.session:
         return redirect('homepage')
@@ -601,7 +603,8 @@ def invoice(request):
 #     return render(request, 'user/userprofile.html')
 
 # //-- Admin Functions --//
-    
+
+@never_cache  
 def admin_home(request):
     if 'mail' in request.session:
         orders_months=ol.objects.annotate(month=ExtractMonth('order_date')).values('month').annotate(count=Count('orderlistid')).values('month','count')
@@ -887,7 +890,8 @@ def admin_logout(request):
         return redirect('admin_login')
     else:
         return redirect('admin_login')
-    
+
+@never_cache   
 def order_management(request):
     if 'mail' in request.session:
         if 'search' in request.GET:
