@@ -442,7 +442,7 @@ def cart_item_decrement(request):
         product = p.objects.get(productid=pid)
         cart_item.total_price = product.price * cart_item.quantity
         cart_item.save()
-        
+
         # cart_list = cl.objects.filter(ctid=cart.cartid)
         # total = 0
         # for item in cart_list:
@@ -646,7 +646,6 @@ def salesreport(request):
         if (currentdate >= fromdt) and (currentdate >= todt) and (fromdt < todt):
             if 'pdf' in request.POST:
                 data = ol.objects.filter(order_date__range=[fromdate, todate])
-                print(data)
                 template_path = 'admin/report.html'
                 context = {'data': data,
                            'fromdate': fromdate, 'todate': todate}
@@ -845,7 +844,7 @@ def addcategory(request):
     if 'mail' in request.session:
         if request.method=='POST':
             add_cname=request.POST.get("add_cname")
-            cat = c.objects.filter(categoryname=add_cname).count()
+            cat = c.objects.filter(cname=add_cname).count()
             if cat > 0:
                 messages.error(request, "Category already exist")
                 return redirect('category_management')
